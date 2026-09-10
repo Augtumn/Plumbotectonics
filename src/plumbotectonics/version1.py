@@ -1,6 +1,22 @@
 # -*- coding: utf-8 -*-
 """Version I plumbotectonics model (Zartman & Doe, 1981).
 
+Each orogeny has two stages, following the equation numbers of the paper:
+
+* extraction (eqs. 14-16): every reservoir contributes a mass fraction of
+  itself, and the contribution carries the reservoir's composition times an
+  enrichment factor ``E`` (``E_m = 4`` for the mantle, ``E_u = E_l = 1``);
+* redistribution (eqs. 17-19): the orogene content is split between the three
+  returning increments -- the material going back to the mantle (mass
+  ``M_or - 2.6 - 2.6``) and the new upper and lower crust (``2.6`` each) --
+  in proportion to ``mass x partitioning ratio``, normalised by
+  ``s = sum(mass_i * F_i)``.  ``F_PB``/``F_U``/``F_TH`` are therefore
+  *concentration* ratios, not fractions of the orogene content.
+
+With the Table II parameters this reproduces Table IV (all 126 values) and
+the Table II section III ending inventories to the precision printed in the
+paper; see ``docs/validation.md``.
+
 Reference:
     Zartman, R. E., & Doe, B. R. (1981). Plumbotectonics - the model.
     Tectonophysics, 75(1-2), 135-162.
@@ -86,23 +102,36 @@ def run():
         # record orogene after mixing (same t)
         history[-1]['orogene'] = ratios(oro)
 
-        # --- redistribution fractions ---
+        # --- redistribution (eqs. 17-19) ---
+        # F_PB/F_U/F_TH are *concentration* ratios among the three returning
+        # increments, not fractions of the orogene content.  Each increment
+        # therefore receives a share weighted by its own mass: the material
+        # going back to the mantle (m_ret), and the new upper/lower crust
+        # (NEW_U/NEW_L).  s normalises the three shares to 1, so the orogene
+        # content is redistributed without loss.
+        m_ret = d_or - NEW_U - NEW_L
+
         def part_fraction(isok):
             if isok in ('204','206','207','208'): return F_PB
             if isok == '238': return F_U
             if isok == '232': return F_TH
-            return (0,0,0)
+            return (0., 0., 0.)
 
         new_u = {'mass': NEW_U, '204':0., '206':0., '207':0., '208':0., '232':0., '238':0.}
         new_l = {'mass': NEW_L, '204':0., '206':0., '207':0., '208':0., '232':0., '238':0.}
+        ret_m = {}
         for isok in ['204','206','207','208','232','238']:
-            fr = part_fraction(isok)
-            new_u[isok] = oro[isok] * fr[1]
-            new_l[isok] = oro[isok] * fr[2]
-        ret_m = {k: oro[k] * part_fraction(k)[0] for k in ['204','206','207','208','232','238']}
+            f_ret, f_u, f_l = part_fraction(isok)
+            s = m_ret * f_ret + NEW_U * f_u + NEW_L * f_l
+            if s <= 0:  # degenerate parameters only; unreachable for Table II
+                ret_m[isok] = new_u[isok] = new_l[isok] = 0.
+                continue
+            ret_m[isok] = oro[isok] * (m_ret * f_ret) / s
+            new_u[isok] = oro[isok] * (NEW_U * f_u) / s
+            new_l[isok] = oro[isok] * (NEW_L * f_l) / s
 
         # --- update reservoirs after orogeny ---
-        mantle['mass'] = mantle['mass'] - dm + (d_or - NEW_U - NEW_L)
+        mantle['mass'] = mantle['mass'] - dm + m_ret
         inc_m = {k: mantle[k] * f_m * E_M for k in ['204','206','207','208','232','238']}
         for k in ['204','206','207','208','232','238']:
             mantle[k] = mantle[k] - inc_m[k] + ret_m[k]
