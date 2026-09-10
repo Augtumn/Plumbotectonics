@@ -177,11 +177,24 @@ def _bulk(rows):
     return None if len(rows) == 0 else ratios(rows.sum(axis=0))
 
 
-def _initial_row(decay_parents):
+def _initial_row(decay_parents, mu0=None, kappa0=None):
+    """The undifferentiated 4.0 Ga mantle.
+
+    ``mu0`` and ``kappa0`` override the inherited Zartman & Doe abundances.
+    Note which convention they belong to: under the constant-parent default
+    (``decay_parents=False``) they are the MODERN-EQUIVALENT ratios (Zartman &
+    Doe's 9.184 and 3.825), whereas under ``decay_parents=True`` they are the
+    actual 4.0 Ga values (17.081 and 2.507).  The two describe the same mantle.
+    """
     if decay_parents:
         u238, th232, u235 = U2380_ACTUAL, TH2320_ACTUAL, U2380_ACTUAL / U8U5_0
     else:
         u238, th232, u235 = U2380, TH2320, 0.0
+    if mu0 is not None:
+        u238 = PB2040 * float(mu0)
+        u235 = u238 / U8U5_0 if decay_parents else 0.0
+    if kappa0 is not None:
+        th232 = u238 * float(kappa0)
     return np.array([PB2040, PB2040 * R2060, PB2040 * R2070, PB2040 * R2080,
                      th232, u238, u235], dtype=float)
 
@@ -201,7 +214,8 @@ def _inventory(mantle, upper, lower):
     return total
 
 
-def check_conservation(mantle, upper, lower, decay_parents=False, rtol=1e-9):
+def check_conservation(mantle, upper, lower, decay_parents=False, rtol=1e-9,
+                       start=None):
     """Assert that the run conserved what it must.
 
     204Pb is conserved in both parameterisations.  Under Zartman & Doe's
@@ -212,9 +226,11 @@ def check_conservation(mantle, upper, lower, decay_parents=False, rtol=1e-9):
     the daughter-plus-parent sum: 206Pb + 238U, 207Pb + 235U, 208Pb + 232Th.
 
     Returns the relative deviations, raising AssertionError if any exceeds
-    ``rtol``.
+    ``rtol``.  ``start`` lets a caller that overrode the initial abundances
+    supply the state it actually began from.
     """
-    start = _initial_row(decay_parents)
+    if start is None:
+        start = _initial_row(decay_parents)
     end = _inventory(mantle, upper, lower)
     if decay_parents:
         pairs = [(_I204, None), (_I206, _I238), (_I207, _I235), (_I208, _I232)]
@@ -234,15 +250,21 @@ def check_conservation(mantle, upper, lower, decay_parents=False, rtol=1e-9):
 
 
 def run(decay_parents=False, melt_model="zd1981", share_model="four_bin",
-        strict=True):
+        mass_u=NEW_U, mass_l=NEW_L, mu0=None, kappa0=None, strict=True):
     """Run the 11 orogenies.
 
     ``decay_parents`` selects between Zartman & Doe's constant-parent
     convention (default) and the paper's decaying-parent eqs. (9)-(10);
-    ``melt_model`` between the published E_m = 4 and batch melting.  With
-    ``strict`` the element inventory is asserted at the end.
+    ``melt_model`` between the published E_m = 4 and batch melting;
+    ``share_model`` between the physical four-bin redistribution (default) and
+    the paper's printed three-term eq. (6).  ``new_u`` and ``new_l`` are the
+    masses of the new upper and lower crustal layer formed by each orogeny; the
+    paper asserts they are equal but never prints the number, so both default to
+    Zartman & Doe's 2.6 (per 1e24 g).  See ``docs/validation.md`` section 5 for
+    what inverting the paper's own tables says about them.  With ``strict`` the
+    element inventory is asserted at the end.
     """
-    mantle = _initial_row(decay_parents)
+    mantle = _initial_row(decay_parents, mu0, kappa0)
     mantle_mass = MASS0
     upper = np.zeros((0, 7))
     upper_mass = np.zeros(0)
@@ -298,7 +320,7 @@ def run(decay_parents=False, melt_model="zd1981", share_model="four_bin",
         # "four_bin" reproduces the paper's Table 3 markedly better (mean
         # absolute deviation 0.13 against 0.22) and puts the present-day upper
         # crust at 19.90 where the paper prints 19.86; "paper" gives 20.42.
-        m_ret = d_or - NEW_U - NEW_L
+        m_ret = d_or - mass_u - mass_l
         m_back = RETURN * m_ret
         left_mass = (1.0 - RETURN) * m_ret
         if share_model == "four_bin":
@@ -307,13 +329,13 @@ def run(decay_parents=False, melt_model="zd1981", share_model="four_bin",
             w_ret, w_left = m_ret, 0.0
         else:
             raise ValueError(f"unknown share_model {share_model!r}")
-        s = w_ret * _F_RET + w_left * _F_UP + NEW_U * _F_UP + NEW_L * _F_LOW
+        s = w_ret * _F_RET + w_left * _F_UP + mass_u * _F_UP + mass_l * _F_LOW
         share = np.ones(7) if np.all(s > 0) else (s > 0)
         safe = np.where(s > 0, s, 1.0)
         ret_m = np.where(share, inc * (w_ret * _F_RET) / safe, 0.0)      # to mantle
         left_elems = np.where(share, inc * (w_left * _F_UP) / safe, 0.0)  # sediment
-        new_u = np.where(share, inc * (NEW_U * _F_UP) / safe, 0.0)
-        new_l = np.where(share, inc * (NEW_L * _F_LOW) / safe, 0.0)
+        new_u = np.where(share, inc * (mass_u * _F_UP) / safe, 0.0)
+        new_l = np.where(share, inc * (mass_l * _F_LOW) / safe, 0.0)
         if share_model == "paper":
             # the 10 % is a subtraction from the residual bin, not its own bin
             left_elems = (1.0 - RETURN) * ret_m
@@ -326,9 +348,9 @@ def run(decay_parents=False, melt_model="zd1981", share_model="four_bin",
         lower = lower * (1 - ERO_L)
         lower_mass = lower_mass * (1 - ERO_L)
         upper = np.vstack([upper, new_u])
-        upper_mass = np.append(upper_mass, NEW_U)
+        upper_mass = np.append(upper_mass, mass_u)
         lower = np.vstack([lower, new_l])
-        lower_mass = np.append(lower_mass, NEW_L)
+        lower_mass = np.append(lower_mass, mass_l)
         if left_mass > 0:
             upper = np.vstack([upper, left_elems])
             upper_mass = np.append(upper_mass, left_mass)
@@ -368,7 +390,8 @@ def run(decay_parents=False, melt_model="zd1981", share_model="four_bin",
                 decay(lower)
 
     if strict:
-        check_conservation(mantle, upper, lower, decay_parents)
+        check_conservation(mantle, upper, lower, decay_parents,
+                           start=_initial_row(decay_parents, mu0, kappa0))
 
     return history, row_to_dict(mantle, mantle_mass), \
         [row_to_dict(r, m) for r, m in zip(upper, upper_mass)], \

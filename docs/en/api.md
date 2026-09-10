@@ -150,13 +150,15 @@ Table 2, changes the lower-crust retention to $p^l=0.95$ and returns 90 % of the
 residual orogene to the mantle. **Zero free parameters** (everything not given
 by the paper is inherited from ZD1981).
 
-### `run(decay_parents=False, melt_model="zd1981", strict=True)`
+### `run(decay_parents=False, melt_model="zd1981", share_model="four_bin", mass_u=2.6, mass_l=2.6, mu0=None, kappa0=None, strict=True)`
 
 | Parameter | Default | Meaning |
 |---|---|---|
 | `decay_parents` | `False` | `False` = ZD1981 constant parents; `True` = the paper's eqs. (9)(10), parents really decay (235U tracked separately). **The two are equivalent digit for digit** |
 | `melt_model` | `"zd1981"` | `"zd1981"` = $E_m$ fixed at 4; `"batch"` = batch melting $E=1/f_m$ |
 | `share_model` | `"four_bin"` | reading of the eq. (6) normalisation: `"four_bin"` = four terms, the 10 % weighted with $F^u$ (physically self-consistent, **default**); `"paper"` = the printed three terms, the 10 % weighted with $F^o$. The two coincide when `RETURN = 1`. See validation.md section 5.4 |
+| `mass_u` / `mass_l` | `2.6` | mass of the new upper/lower crustal layer formed per orogeny (x 10^24 g). The paper asserts the two are equal but never prints the number, so both inherit ZD1981's 2.6. Inversion results: validation.md section 5.3 |
+| `mu0` / `kappa0` | `None` | override the inherited initial abundances (`None` uses ZD1981's 9.184 / 3.825). Mind the convention: under `decay_parents=False` these are MODERN-EQUIVALENT ratios, under `True` the actual 4.0 Ga values (17.081 / 2.507) |
 | `strict` | `True` | assert element-inventory conservation at the end, raising `AssertionError` on violation |
 
 Returns `(history, mantle, upper_segs, lower_segs)`:

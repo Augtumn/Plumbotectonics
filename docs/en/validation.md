@@ -329,30 +329,59 @@ The qualitative features (on which the whole argument of the paper rests) do
 hold: upper crust 19.90 > mantle 17.32 > lower crust 17.14 (paper
 19.86 > 17.92 > 17.10).
 
-### 5.3 Why Table 3 cannot be reproduced
+### 5.3 Inverting the unpublished values: the new-crust mass
 
-**Inverting the initial values from Table 3** (three unknowns: $\mu_0$,
-$\kappa_0$, new-crustal mass $m$; Jacobian condition number 52, inter-parameter
-correlations <=0.46, so the inverse problem is well posed):
+The paper prints "**assume the upper and lower crust masses are equal**" but
+never prints the number, so it can only be inherited from ZD1981's
+2.6 x 10^24 g.  Freeing the quantities the four tables do not give (`mass_u`,
+`mass_l`, `mu0`, `kappa0`; Jacobian condition numbers 22-46, parameter
+correlations <= 0.65, so the inverse problem is well posed):
 
-| Data | $\mu_0$ | $\kappa_0$ | $m$ ($10^{24}$ g) |
-|---|---|---|---|
-| Table 3 only (99 values) | 17.346 +- 0.033 | 2.570 +- 0.019 | **15.15 +- 0.96** |
-| Table 4 only (6 values) | 16.674 +- 0.276 | 2.471 +- 0.036 | **1.28 +- 0.48** |
-| ZD1981 inherited values | 17.081 | 2.507 | 2.600 |
+| Data | $\mu_0$ | $\kappa_0$ | $m_{upper}$ | $m_{lower}$ | Table 3 max | Table 3 mean |
+|---|---|---|---|---|---|---|
+| Table 3 only | 9.933 +- 0.034 | 3.818 +- 0.025 | **7.478 +- 0.408** | **2.273 +- 0.388** | **0.2465** | **0.0422** |
+| Table 4 only | 9.953 +- 0.022 | 3.752 +- 0.006 | 2.255 +- 0.066 | 1.808 +- 0.064 | 0.7014 | 0.1794 |
+| **Tables 3 + 4 jointly** | 9.551 +- 0.047 | 3.862 +- 0.027 | **5.755 +- 0.652** | **5.209 +- 0.637** | **0.3304** | **0.0949** |
+| ZD1981 inherited (current default) | 9.184 | 3.825 | 2.600 | 2.600 | 0.5998 | 0.1322 |
 
-Two conclusions:
+($\mu_0$ and $\kappa_0$ are MODERN-EQUIVALENT ratios, the same convention as
+ZD1981's 9.184 / 3.825; five different starting points all converge on the same
+solution, so it is not a local minimum.)
 
-1. **The initial abundances are essentially right** -- the $\mu_0$ and
-   $\kappa_0$ inverted from Table 3 differ from ZD1981 by only 1.6 % and 2.5 %,
-   so "inherit the initial abundances from ZD1981" is defensible.
-2. **The two tables are mutually incompatible** -- Table 3 demands
-   $m \approx 15.15 \pm 0.96$ while Table 4 demands $1.28 \pm 0.48$, **about
-   13 sigma apart**. One single parameter set cannot produce both tables.
+Three conclusions:
 
-Even freeing all three parameters in a fit only pushes the worst Table 3
-deviation down to 0.29 (with Table 4 blowing up to 1.96), which shows that the
-residual deviation is **structural**, not a calibration problem.
+1. **The initial abundances are right** -- inverting Table 3 and Table 4
+   separately both put $\mu_0$ at **9.93-9.95** (about 8 % above ZD1981's 9.184)
+   and $\kappa_0$ at 3.75-3.82 (ZD1981: 3.825).  The two tables agree about the
+   initial abundances, which supports inheriting ZD1981's order of magnitude.
+2. **The crustal mass is about twice the inherited value** -- the joint
+   inversion gives $m \approx 5.5 \pm 0.65$ (upper) and $5.2 \pm 0.64$ (lower),
+   **2.1x** ZD1981's 2.6.
+3. **The paper's "equal masses" assumption contradicts Table 3** -- inverting
+   Table 3 alone gives $m_{upper} = 7.48$ against $m_{lower} = 2.27$, the upper
+   layer being **3.3x** the lower, 9 sigma apart.  Freeing that one degree of
+   freedom cuts the Table 3 mean deviation from 0.094 to **0.042**.
+
+**The crustal mass and the initial abundances are degenerate**: pinning the
+abundances at ZD1981's values and varying only the mass never takes the Table 3
+worst deviation below 0.45 (at $m \approx 8$), while the mean deviation is in
+fact best near $m \approx 2.6$.  **So "the crustal mass is wrong" is neither
+the only reason Table 3 resists reproduction nor even the main one.**
+
+Adopting the joint inversion improves **both** tables at once (the only
+configuration that does):
+
+| Configuration | Table 3 max | Table 3 mean | Table 4 max | Table 4 upper/mantle/lower `238U/204Pb` |
+|---|---|---|---|---|
+| ZD1981 default (no tuned parameters) | 0.5998 | 0.1322 | 0.6031 | 7.91 / 5.34 / 14.38 |
+| **Joint inversion (4 calibrated parameters)** | **0.3304** | **0.0949** | **0.3979** | 8.51 / 5.40 / 14.58 |
+| Table 3 first | 0.2465 | 0.0422 | 2.4733 | 8.59 / 4.81 / 12.51 |
+
+The default keeps ZD1981's inherited values (everything the paper does not print
+is inherited, so the model has **no tuned parameters**); the second row is
+reproducible with
+`china.run(mu0=9.5505, kappa0=3.8623, mass_u=5.755, mass_l=5.209)` and is
+**calibration**, not inheritance.
 
 ### 5.4 eq. (6) conflicts with its own gloss (readings A and B)
 

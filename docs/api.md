@@ -139,13 +139,15 @@ Version IV 的摩尔分配函数（见 [`theory.md`](theory.md) §3.6）。**逐
 只替换论文的表 1 与表 2，并把下地壳保留比例改为 $p^l=0.95$、残余造山带按 90 %
 返回地幔。**零自由参数**（未给出的量全部继承 ZD1981）。
 
-### `run(decay_parents=False, melt_model="zd1981", strict=True)`
+### `run(decay_parents=False, melt_model="zd1981", share_model="four_bin", mass_u=2.6, mass_l=2.6, mu0=None, kappa0=None, strict=True)`
 
 | 参数 | 默认 | 含义 |
 |---|---|---|
 | `decay_parents` | `False` | `False` = ZD1981 母体常数化；`True` = 论文 eqs. (9)(10) 母体真衰变（²³⁵U 独立跟踪）。**两者逐位等价** |
 | `melt_model` | `"zd1981"` | `"zd1981"` = $E_m$ 恒为 4；`"batch"` = 批式熔融 $E=1/f_m$ |
 | `share_model` | `"four_bin"` | eq. (6) 的归一化因子读法：`"four_bin"` = 四项（那 10 % 用 $F^u$，物理自洽，**默认**）；`"paper"` = 论文印刷的三项（那 10 % 用 $F^o$）。`RETURN = 1` 时两者完全一致。见 [`validation.md`](validation.md) §5.4 |
+| `mass_u` / `mass_l` | `2.6` | 每轮新成上/下地壳层的质量（×10²⁴ g）。论文只说两者相等、未给数值，故继承 ZD1981 的 2.6。反演结果见 [`validation.md`](validation.md) §5.3 |
+| `mu0` / `kappa0` | `None` | 覆盖继承的初始丰度（`None` = 用 ZD1981 的 9.184 / 3.825）。注意约定：`decay_parents=False` 时是**现代等效**比值，`True` 时是 4.0 Ga 实际值（17.081 / 2.507） |
 | `strict` | `True` | 结束时断言元素总量守恒，违反则抛 `AssertionError` |
 
 返回 `(history, mantle, upper_segs, lower_segs)`：
