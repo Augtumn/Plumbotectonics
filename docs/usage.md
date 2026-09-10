@@ -33,6 +33,8 @@ uv run python scripts/run_version1.py
 打印 11 个旋回在 `206/204`、`207/204`、`208/204` 上的
 地幔、造山带、上地壳、下地壳比值。
 
+同一张表写入 `outputs/results/version1_history.csv`（UTF-8-BOM，用标准库 `csv`，不依赖 pandas）。
+
 ### 3.2 Version IV（Table 4 对比）
 
 ```bash
@@ -123,7 +125,7 @@ pt.v4_ratios(pt.run_version4()["mantle"])
 ```
 outputs/
 ├── figures/   # version1_growth_curves.{png,pdf}, version4_growth_curves.{png,pdf}
-└── results/   # version4_comparison.csv
+└── results/   # version1_history.csv, version4_comparison.csv
 ```
 
 目录会在运行时自动创建。

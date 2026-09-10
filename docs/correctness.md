@@ -139,8 +139,9 @@ for name in dir(t):
         print("ok", name)
 ```
 
-`scripts/run_version4.py` 会把 24 项对比写入
-`outputs/results/version4_comparison.csv`，便于人工复核。
+`scripts/run_version1.py` 与 `scripts/run_version4.py` 分别把结果写入
+`outputs/results/version1_history.csv`（11 个旋回的递推结果）与
+`outputs/results/version4_comparison.csv`（24 项 Table 4 对比），便于人工复核。
 
 ## 9. 局限与适用范围
 

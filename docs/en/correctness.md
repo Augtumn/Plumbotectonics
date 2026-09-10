@@ -155,8 +155,10 @@ for name in dir(t):
         print("ok", name)
 ```
 
-`scripts/run_version4.py` writes the 24 comparisons to
-`outputs/results/version4_comparison.csv` for manual review.
+`scripts/run_version1.py` and `scripts/run_version4.py` write their results to
+`outputs/results/version1_history.csv` (the 11-cycle recursion) and
+`outputs/results/version4_comparison.csv` (the 24 Table 4 comparisons) for
+manual review.
 
 ## 9. Scope and limitations
 

@@ -32,7 +32,8 @@ uv run python scripts/run_version1.py
 ```
 
 Prints the `206/204`, `207/204` and `208/204` ratios of the mantle, orogene,
-upper crust and lower crust for all 11 cycles.
+upper crust and lower crust for all 11 cycles. The same table is written to
+`outputs/results/version1_history.csv` (UTF-8 with BOM, stdlib `csv`, no pandas).
 
 ### 3.2 Version IV (Table 4 comparison)
 
@@ -124,7 +125,7 @@ pt.v4_ratios(pt.run_version4()["mantle"])
 ```
 outputs/
 |-- figures/   # version1_growth_curves.{png,pdf}, version4_growth_curves.{png,pdf}
-`-- results/   # version4_comparison.csv
+`-- results/   # version1_history.csv, version4_comparison.csv
 ```
 
 Directories are created automatically at run time.
