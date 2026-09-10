@@ -26,7 +26,7 @@ occurs.
 | Module | Model | Reference |
 |---|---|---|
 | `plumbotectonics.version1` | Version I | Zartman & Doe (1981) |
-| `plumbotectonics.version4` | PLUMBO version IV | Haines & Zartman (1988) |
+| `plumbotectonics.version4` | Version IV | Haines & Zartman (1988) |
 
 Version I is a two-reservoir (mantle + crust) mass balance with fixed
 partition coefficients. Version IV (PLUMBO) adds the mid-ocean-ridge (MOR)

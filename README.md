@@ -23,7 +23,7 @@ Plumbotectonics 是一类质量平衡模型：把地球浅部划分为若干长�
 | 模块 | 模型 | 文献 |
 |---|---|---|
 | `plumbotectonics.version1` | Version I | Zartman & Doe (1981) |
-| `plumbotectonics.version4` | PLUMBO version IV | Haines & Zartman (1988) |
+| `plumbotectonics.version4` | Version IV | Haines & Zartman (1988) |
 
 Version I 是"地幔 + 地壳"的两储库质量平衡，使用固定的分配系数；
 Version IV（PLUMBO）增加了洋中脊（MOR）储库、次地壳岩石圈、造山带的三组分
