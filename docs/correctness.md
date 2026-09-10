@@ -13,7 +13,7 @@
 | ② 不变量校验 | 守恒量与结构约束 | `tests/test_conservation.py` |
 | ③ 回归测试 | 每次改动重跑 ①+② | `pytest`（含 `tests/test_plotting.py` 的图形布局与 PDF 无时间戳检查） |
 
-三层全部通过，才认为结果"在模型定义下正确"。当前实测：**19/19 通过**。
+三层全部通过，才认为结果"在模型定义下正确"。当前实测：**22/22 通过**。
 
 ## 2. ① 基准校验
 
@@ -101,34 +101,40 @@ $$
 
 | 位置 | 保护 |
 |---|---|
-| `version4.FNEmoles` | `Bias <= 0` 或 `Denom == 0` → 返回 `0.0` |
+| `version4.FNEmoles` | `Bias <= 0` 或 `Denom == 0` → 掩码置 `0`（迁移前是分支返回 `0.0`，取值相同） |
 | `version4.run` 的 `V0` | 段质量为 0 → `V0 = 0` |
 | `version4.run` 的 `S_mant` 同位素分配 | 分母 `M_m - M_or == 0` → 跳过 |
 | `version1.ratios` / `version4.ratios` | 分母为 0 → 返回 `None` |
+| `version1.run` 的再分配份额 `s` | `s <= 0` → 该同位素份额取 0（退化参数专用，Table II 下不可达） |
 | `plotting._extract_version4_series` | 跳过比值为 `None` 的条目 |
 
 `tests/test_conservation.py` 覆盖了 `FNEmoles` 的两个守卫分支与 `ratios` 的
 零分母分支。
 
-**浮点精度实测**（模型只用标准库 `math`，不依赖 numpy）：
+**浮点精度实测**（两个模型用 NumPy 数组承载状态，`np.exp` 做衰变）：
 
 | 项 | 实测 |
 |---|---|
-| 整模型 float64 vs 60 位十进制重算（Version I 全流程） | 最大相对差 **8.4e-16**（约 4 ulp） |
+| 整模型 vs 60 位十进制重算（Version I 全流程） | 最大相对差 **8.4e-16**（约 4 ulp） |
 | 终态 204Pb、238U | **逐位相同** |
-| 11 / 46 项段求和：`sum()` vs `math.fsum()` vs 逆序求和 | **逐位相同** |
-| `math.exp` vs `np.exp`（模型实际用到的 66 + 276 个指数参数） | **逐位相同** |
+| 22 项段求和：`np.sum`（成对）vs `math.fsum`（精确） | 204 逐位相同；238 相对差 1.6e-16 |
+| **迁移前后**：stdlib 版 vs NumPy 版 | Version I **6.5e-16**、Version IV **8.9e-16** |
+| `np.exp` vs `math.exp`（模型实际用到的 342 个指数参数） | **逐位相同**（0 个不同） |
 
 即浮点误差比 Table IV 的 0.005 容差低 12 个数量级；模型精度的实际限制是
-论文的印刷位数与参数本身，不是数值格式。换用 numpy 不会改变任何一位
-（`math.exp` 调平台 libm，通常 <1 ulp；numpy 的超越函数不保证正确舍入）。
+论文的印刷位数与参数本身，不是数值格式。迁移到 NumPy 后与迁移前的结果差异
+只有 3–4 ulp（全部来自 `np.sum` 的成对求和），**Table IV / Table 4 对比表中
+没有任何一位数字发生变化**——两份 CSV 与迁移前逐字节相同。
+
+> 注意：numpy 的超越函数**不保证正确舍入**。本机实测 `np.exp` 与 `math.exp`
+> 在这 342 个参数上逐位一致，但这是平台相关的；换平台后 `np.exp` 可能差
+> ~1 ulp，届时上表最后一行的结论需要重测。
 
 ## 6. 可复现性
 
-- **零第三方依赖**：两个模型（`version1.py`、`version4.py`）只 `import math`，
-  不依赖 numpy/pandas/matplotlib，也不读任何外部数据文件；`numpy`/`pandas`
-  只用于 `scripts/` 的对比统计（`np.max`/`np.sqrt`/`np.mean`），`matplotlib`
-  只用于绘图；
+- **依赖边界**：两个模型只用 **NumPy**（`version1.py`、`version4.py` 均
+  `import numpy as np`），不再需要 `math`，也不读任何外部数据文件；
+  `pandas` 只用于 `scripts/` 的对比统计，`matplotlib` 只用于绘图；
 - **完全确定性**：全流程无随机数、无时间戳、无并行归约顺序不确定；
   `plotting.py` 显式清空 PDF 元数据里的 `CreationDate`，否则 matplotlib 会写入
   生成时刻，PDF 图便无法逐位复现；

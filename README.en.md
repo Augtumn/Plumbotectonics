@@ -15,7 +15,8 @@ occurs.
 
 ## Features
 
-- Pure-Python implementations of **Version I** (Zartman & Doe, 1981) and
+- Pure-Python implementations (no third-party dependency beyond NumPy) of
+  **Version I** (Zartman & Doe, 1981) and
   **Version IV** (Haines & Zartman, 1988);
 - Reproduces all 24 present-day values of Haines & Zartman (1988), Table 4
   (worst absolute deviation **0.00993**, test tolerance 0.02); two of those
@@ -52,10 +53,11 @@ uv sync              # create .venv and install runtime dependencies
 uv sync --extra dev  # add the dev dependencies (pytest)
 ```
 
-Runtime dependencies are `numpy`, `pandas` and `matplotlib`. **The models
-themselves have no third-party dependencies** (`version1.py` and `version4.py`
-import only `math`): numpy/pandas serve the comparison statistics in `scripts/`
-and matplotlib only the plotting. See [`docs/en/usage.md`](docs/en/usage.md).
+Runtime dependencies are `numpy`, `pandas` and `matplotlib`. **The two models
+use NumPy only** (`version1.py` and `version4.py` both `import numpy as np`,
+with the state held in arrays and each cycle applied to whole slices):
+`pandas` serves the comparison statistics in `scripts/` and `matplotlib` only
+the plotting. See [`docs/en/usage.md`](docs/en/usage.md).
 
 ## Run
 
@@ -103,7 +105,8 @@ III.B, the 24 Table 4 ratios of the four Version IV reservoirs
 (`abs(diff) < 0.02`), and the mass-conservation and structural invariants of
 both models (`tests/test_conservation.py`) plus the figure layout and PDF
 reproducibility (`tests/test_plotting.py`: no titled overlap, no embedded
-timestamp). Current status: **19/19 passing**.
+timestamp) and the post-migration dependency boundary and public return
+structure (`tests/test_conservation.py`). Current status: **22/22 passing**.
 
 ## Validation
 

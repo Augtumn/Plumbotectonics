@@ -255,8 +255,7 @@ combination.
 
 `scripts/run_version4.py` needs `pandas`; if `pandas` and `pytz` versions are
 mismatched it raises `ImportError: Can't determine version for pytz`. The model
-itself (`version4.py`) does not depend on pandas and can be driven from the
-standard library alone.
+itself (`version4.py`) does not depend on pandas and needs only NumPy.
 
 ### 4.8 Two sub-reservoir targets in the Version IV table come from OCR misreads (**not fixed**)
 

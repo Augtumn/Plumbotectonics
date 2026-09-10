@@ -195,7 +195,7 @@ oro_moles[h] = D_oro_h[0][2] + P_oro_h[0][1] + W_oro_h[0][2]
 
 `version4.py` 原先第 1 行是 `INIT_RATIOS = (...)`，位于模块文档字符串
 之前，导致该字符串不是真正的 `__doc__`。已把 `INIT_RATIOS` 移到
-docstring 与 `import math` 之后。
+docstring 与 `import numpy as np` 之后。
 
 ### 4.4 `pyproject.toml` 的 dev extra 含未使用的 `scipy`
 
@@ -233,7 +233,7 @@ orogene 35.769，与采用值分别相差 0.000 与 0.001；而 36.77 无法由�
 ### 4.7 环境依赖
 
 `scripts/run_version4.py` 依赖 `pandas`；若环境中 `pandas` 与 `pytz`
-版本不匹配，会抛 `ImportError: Can't determine version for pytz`。模型本身（`version4.py`）不依赖 pandas，可只用标准库调用。
+版本不匹配，会抛 `ImportError: Can't determine version for pytz`。模型本身（`version4.py`）不依赖 pandas，只用 NumPy 即可调用。
 
 ### 4.8 Version IV 对照表中两个 sub 储库目标值取自 OCR 误读（**未修复**）
 

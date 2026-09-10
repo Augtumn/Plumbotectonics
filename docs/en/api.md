@@ -39,6 +39,12 @@ see [`theory.md`](theory.md) section 2.5) and decays per eqs. 20-22.
 `history` records the state **before** each orogeny, matching the instant used
 by Table IV.
 
+The internal state is carried in NumPy arrays: each reservoir is an
+`(n_segs, 6)` array whose columns follow the module constant
+`ISO_KEYS = ("204","206","207","208","232","238")`, and extraction,
+redistribution and decay all act on whole slices.  **The return structure is
+unchanged** -- the plain `dict`s below.
+
 **Returns**: `(history, mantle, upper_segs, lower_segs)`
 
 - `history`: `list[dict]`, one entry per cycle:
@@ -49,18 +55,24 @@ by Table IV.
 ### `ratios(res)`
 
 Maps a reservoir dictionary to `{"206/204", "207/204", "208/204"}`; returns
-`None` when `res["204"] == 0`.
+`None` when `res["204"] == 0`.  An internal length-6 NumPy row may also be
+passed directly.
 
 ### `avg_res(segs)`
 
 Sums a list of segments and returns `ratios(...)`; returns `None` for an empty
 list.
 
+### `row_to_dict(row, mass)`
+
+Converts an internal length-6 row plus its mass into the segment dict above
+(`run()` calls it just before returning).
+
 ### Module constants
 
 `L238`, `L235`, `L232`, `U8U5`, `MASS0`, `PB2040`, `U2380`, `TH2320`,
-`R2060`, `R2070`, `R2080`, `NEW_U`, `NEW_L`, `F_PB`, `F_U`, `F_TH`, `E_M`,
-`E_U`, `E_L`.
+`R2060`, `R2070`, `R2080`, `NEW_U`, `NEW_L`, `ERO_U`, `ERO_L`, `ISO_KEYS`,
+`F_PB`, `F_U`, `F_TH`, `E_M`, `E_U`, `E_L`.
 
 ## `plumbotectonics.version4`
 
@@ -117,13 +129,18 @@ A zero denominator gives `None`.
 ### `FNEmoles(N, Mass1, Mass2, Bias)`
 
 The Version IV mole-split function (see [`theory.md`](theory.md) section 3.6).
-Returns `0.0` when `Bias <= 0` or `Mass1*Bang + Mass2*(1-Bang) == 0`.
+It works **elementwise**, so a whole length-6 isotope axis can be passed at
+once, which is what `run()` does.  It returns `0` when `Bias <= 0` or
+`Mass1*Bang + Mass2*(1-Bang) == 0`: previously a branch returning `0.0`, now a
+mask with `np.divide(..., where=...)` -- the same values, and no
+`RuntimeWarning`.
 
 ### Module constants and arrays
 
 `CYCLES`, `A2`, `A3`, `B1`, `B2`, `B3`, `Bs`, `H0`, `L1`, `L2`, `L3`, `U8U5`,
-`INIT_RATIOS`, `A1`, `A4`, `A5`, `A6`, `U`, `L`, `S`, `E_a2`, `F_a3`, `E_b1`,
-`E_b2`, `E_b3`, `F_c3`, `E_up`, `E_low`, `E_sub`.
+`INIT_RATIOS`, `ISO`, `A1`, `A4`, `A5`, `A6`, `U`, `L`, `S`, `E_a2`, `F_a3`,
+`E_b1`, `E_b2`, `E_b3`, `F_c3`, `E_up`, `E_low`, `E_sub` (`A*`, `U`, `L`, `S`
+and the `E_*` arrays are now `np.ndarray`; indexing is unchanged).
 
 ## `plumbotectonics.plotting`
 

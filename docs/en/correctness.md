@@ -16,7 +16,7 @@ the scope of the guarantee. The raw validation data is in
 | 3. Regression | rerun 1+2 on every change | `pytest` (includes the figure layout and PDF-timestamp checks in `tests/test_plotting.py`) |
 
 Only when all three pass is a result considered "correct under the model
-definition". Current status: **19/19 passing**.
+definition". Current status: **22/22 passing**.
 
 ## 2. Layer 1: baseline validation
 
@@ -114,38 +114,45 @@ cannot propagate:
 
 | Location | Guard |
 |---|---|
-| `version4.FNEmoles` | `Bias <= 0` or `Denom == 0` -> returns `0.0` |
+| `version4.FNEmoles` | `Bias <= 0` or `Denom == 0` -> masked to `0` (a branch returning `0.0` before the migration; same values) |
 | `version4.run`, `V0` | zero segment mass -> `V0 = 0` |
 | `version4.run`, isotope split of `S_mant` | denominator `M_m - M_or == 0` -> skipped |
 | `version1.ratios` / `version4.ratios` | zero denominator -> `None` |
+| `version1.run`, redistribution share `s` | `s <= 0` -> that isotope's share is 0 (degenerate parameters only; unreachable for Table II) |
 | `plotting._extract_version4_series` | skips `None` ratios |
 
 `tests/test_conservation.py` covers both `FNEmoles` guards and the zero
 denominator branches of `ratios`.
 
-**Measured floating-point accuracy** (the models use only the standard-library
-`math`, not numpy):
+**Measured floating-point accuracy** (both models carry their state in NumPy
+arrays and use `np.exp` for the decay):
 
 | Item | Measured |
 |---|---|
-| whole model, float64 vs a 60-digit Decimal re-run (all of Version I) | worst relative difference **8.4e-16** (about 4 ulp) |
+| whole model vs a 60-digit Decimal re-run (all of Version I) | worst relative difference **8.4e-16** (about 4 ulp) |
 | final 204Pb, 238U | **bit-identical** |
-| 11 / 46 term sums: `sum()` vs `math.fsum()` vs reversed order | **bit-identical** |
-| `math.exp` vs `np.exp` over the 66 + 276 exponents the models use | **bit-identical** |
+| 22-term segment sums: `np.sum` (pairwise) vs `math.fsum` (exact) | 204 bit-identical; 238 relative 1.6e-16 |
+| **before vs after the migration**: stdlib vs NumPy implementation | Version I **6.5e-16**, Version IV **8.9e-16** |
+| `np.exp` vs `math.exp` over the 342 exponents the models use | **bit-identical** (0 differ) |
 
 The floating-point error is 12 orders of magnitude below the 0.005 tolerance of
 Table IV; what actually limits the model is the number of digits the paper
-prints and the parameters themselves, not the numeric format. Switching to numpy
-would not change a single digit (`math.exp` calls the platform libm, usually
-<1 ulp, whereas numpy's transcendentals are not guaranteed correctly rounded).
+prints and the parameters themselves, not the numeric format.  The migration
+moved results by 3-4 ulp only (all of it from `np.sum`'s pairwise summation) and
+**changed no digit of either comparison table** -- both CSVs are byte-identical
+to the pre-migration ones.
+
+> Note: numpy's transcendental functions are **not guaranteed correctly
+> rounded**.  On this machine `np.exp` matched `math.exp` bit for bit on all 342
+> arguments, but that is platform-dependent; on another platform `np.exp` may
+> differ by ~1 ulp, and the last row above would need re-measuring.
 
 ## 6. Reproducibility
 
-- **No third-party dependencies**: both model cores (`version1.py`,
-  `version4.py`) import only `math` -- not numpy/pandas/matplotlib, and no
-  external data files; `numpy`/`pandas` are used only by the comparison
-  statistics in `scripts/` (`np.max`/`np.sqrt`/`np.mean`) and `matplotlib` only
-  for plotting;
+- **Dependency boundary**: both models use **NumPy** only (`version1.py` and
+  `version4.py` both `import numpy as np`); they no longer need `math`, and read
+  no external data files; `pandas` serves the comparison statistics in
+  `scripts/` and `matplotlib` only the plotting;
 - **Fully deterministic**: no random numbers, no timestamps, no
   order-dependent parallel reductions; `plotting.py` explicitly clears the
   `CreationDate` PDF metadata entry, which matplotlib would otherwise populate

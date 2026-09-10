@@ -12,7 +12,7 @@ Plumbotectonics 是一类质量平衡模型：把地球浅部划分为若干长�
 
 ## 特性
 
-- 纯 Python 实现 **Version I**（Zartman & Doe, 1981）与
+- 纯 Python 实现（除 NumPy 外无第三方依赖）**Version I**（Zartman & Doe, 1981）与
   **Version IV**（Haines & Zartman, 1988）两个模型；
 - 复现 Haines & Zartman (1988) Table 4 的全部 24 个现今值
   （最差绝对偏差 **0.00993**，测试容差 0.02）；其中 sub 库两个目标值取自
@@ -45,10 +45,10 @@ uv sync              # 创建 .venv 并安装运行依赖
 uv sync --extra dev  # 需要 pytest 时追加开发依赖
 ```
 
-运行依赖为 `numpy`、`pandas`、`matplotlib`。**模型本身零第三方依赖**
-（`version1.py`、`version4.py` 只 `import math`）：numpy/pandas 仅用于
-`scripts/` 的对比统计，matplotlib 仅用于绘图。安装位置见
-[`docs/usage.md`](docs/usage.md)。
+运行依赖为 `numpy`、`pandas`、`matplotlib`。**两个模型只用 NumPy**
+（`version1.py`、`version4.py` 均 `import numpy as np`，状态存为数组、逐旋回
+按切片运算）：`pandas` 仅用于 `scripts/` 的对比统计，`matplotlib` 仅用于
+绘图。安装位置见 [`docs/usage.md`](docs/usage.md)。
 
 ## 运行
 
@@ -91,7 +91,8 @@ uv run pytest
 容差 0.006）与 Table II 第三节 B 的 12 项元素丰度、Version IV 四个储库对
 Table 4 的 24 项比对（`abs(diff) < 0.02`）、两个模型的质量守恒与结构不变量
 （`tests/test_conservation.py`）以及图形布局与 PDF 可复现性（标题不得与面板
-标题重叠、PDF 不得带时间戳，`tests/test_plotting.py`）。当前状态：**19/19 通过**。
+标题重叠、PDF 不得带时间戳，`tests/test_plotting.py`）、迁移后的依赖边界与
+公开返回结构（`tests/test_conservation.py`）。当前状态：**22/22 通过**。
 
 ## 校验
 

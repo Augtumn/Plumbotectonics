@@ -36,6 +36,10 @@
 按返回增量质量加权，见 [`theory.md`](theory.md) §2.5）、eq. 20–22 衰变。
 `history` 记录的是**每次造山之前**的状态，与 Table IV 的时刻约定一致。
 
+内部状态用 NumPy 数组承载：每个储库是 `(n_segs, 6)` 的数组，列顺序为模块常量
+`ISO_KEYS = ("204","206","207","208","232","238")`，抽取、再分配与衰变都作用于
+整段切片。**返回结构未变**，仍是下面这些纯 `dict`。
+
 **返回**：`(history, mantle, upper_segs, lower_segs)`
 
 - `history`：`list[dict]`，每个旋回一项：
@@ -46,16 +50,20 @@
 ### `ratios(res)`
 
 把储库字典换成 `{"206/204", "207/204", "208/204"}`；
-`res["204"] == 0` 时返回 `None`。
+`res["204"] == 0` 时返回 `None`。也可直接传入内部的长度 6 的 NumPy 行向量。
 
 ### `avg_res(segs)`
 
 对一组段求和后返回 `ratios(...)`；空列表返回 `None`。
 
+### `row_to_dict(row, mass)`
+
+把内部的长度 6 行向量与质量转换成上面那种段字典（`run()` 在返回前调用它）。
+
 ### 模块常量
 
 `L238`、`L235`、`L232`、`U8U5`、`MASS0`、`PB2040`、`U2380`、`TH2320`、
-`R2060`、`R2070`、`R2080`、`NEW_U`、`NEW_L`、
+`R2060`、`R2070`、`R2080`、`NEW_U`、`NEW_L`、`ERO_U`、`ERO_L`、`ISO_KEYS`、
 `F_PB`、`F_U`、`F_TH`、`E_M`、`E_U`、`E_L`。
 
 ## `plumbotectonics.version4`
@@ -112,14 +120,18 @@
 
 ### `FNEmoles(N, Mass1, Mass2, Bias)`
 
-Version IV 的摩尔分配函数（见 [`theory.md`](theory.md) §3.6）。
-`Bias <= 0` 或 `Mass1*Bang + Mass2*(1-Bang) == 0` 时返回 `0.0`。
+Version IV 的摩尔分配函数（见 [`theory.md`](theory.md) §3.6）。**逐元素运算**，
+所以可以一次性传入整条同位素轴（长度 6 的数组），`run()` 就是这么用的。
+`Bias <= 0` 或 `Mass1*Bang + Mass2*(1-Bang) == 0` 时返回 `0`：迁移前是分支
+（返回 `0.0`），现在是掩码 + `np.divide(..., where=...)`，取值完全相同，
+且不会产生 `RuntimeWarning`。
 
 ### 模块常量与数组
 
 `CYCLES`、`A2`、`A3`、`B1`、`B2`、`B3`、`Bs`、`H0`、`L1`、`L2`、`L3`、
-`U8U5`、`INIT_RATIOS`、`A1`、`A4`、`A5`、`A6`、`U`、`L`、`S`、
-`E_a2`、`F_a3`、`E_b1`、`E_b2`、`E_b3`、`F_c3`、`E_up`、`E_low`、`E_sub`。
+`U8U5`、`INIT_RATIOS`、`ISO`、`A1`、`A4`、`A5`、`A6`、`U`、`L`、`S`、
+`E_a2`、`F_a3`、`E_b1`、`E_b2`、`E_b3`、`F_c3`、`E_up`、`E_low`、`E_sub`
+（`A*`/`U`/`L`/`S`/`E_*` 现为 `np.ndarray`，索引方式不变）。
 
 ## `plumbotectonics.plotting`
 

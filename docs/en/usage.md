@@ -6,6 +6,11 @@
 
 - Python >= 3.10
 - Runtime: `numpy`, `pandas`, `matplotlib`
+  - **the two models themselves use only `numpy`** (state held in ndarrays, each
+    cycle applied to whole slices);
+  - `pandas` is used only by the comparison statistics in
+    `scripts/run_version*.py`;
+  - `matplotlib` is used only for plotting in `plotting.py`.
 - Development: `pytest` (the dev extra in `pyproject.toml` also lists `scipy`,
   which the current source does not use)
 

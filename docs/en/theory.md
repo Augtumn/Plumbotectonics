@@ -224,7 +224,8 @@ Implementation: `plumbotectonics.version4.run()`
 | 2 | lower-crust segment |
 | 3 | subcrustal lithosphere |
 
-State array `M[h][i][k][j]`:
+State array `M[h][i][k][j]` (a NumPy array `M[h, i, k, j]` of shape
+`(7, 3, 48, 4)` in the implementation):
 
 - `h`: 0 = mass, 1-4 = 204/206/207/208, 5 = 232, 6 = 238;
 - `i`: 1 = start of cycle (before the orogeny), 2 = end of cycle;

@@ -6,6 +6,9 @@
 
 - Python >= 3.10
 - 运行依赖：`numpy`、`pandas`、`matplotlib`
+  - **两个模型本体只用 `numpy`**（状态以 ndarray 承载，逐旋回按切片运算）；
+  - `pandas` 仅 `scripts/run_version*.py` 的对比统计使用；
+  - `matplotlib` 仅 `plotting.py` 绘图使用。
 - 开发依赖：`pytest`（`pyproject.toml` 的 dev extra 里还有 `scipy`，
   但当前源码未使用）
 
