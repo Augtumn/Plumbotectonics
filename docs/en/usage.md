@@ -75,7 +75,7 @@ CSV columns are the same as in the other two comparison tables (`t_Ga`,
 `reservoir`, `ratio`, `model`, `literature`, `abs_diff`, `rel_error_pct`); the
 six Table 4 rows have `t_Ga` 0.0 and `ratio` either `238U/204Pb` or `Th/U`.
 
-> **Table 3 is not reproduced** (worst absolute deviation 0.6211, against a
+> **Table 3 is not reproduced** (worst absolute deviation 0.5998, against a
 > table printed to 0.01). This is not a script failure: the paper's Tables 3 and
 > 4 contradict each other, and the new-crustal masses inverted from them differ
 > by about 13 sigma. See [`validation.md`](validation.md) section 5.

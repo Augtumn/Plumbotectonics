@@ -555,8 +555,8 @@ keeps the paper's convention.
 
 | Data | max absolute difference | mean | RMSE |
 |---|---|---|---|
-| paper Table 3 (99 values) | 0.6211 | 0.2199 | 0.2719 |
-| paper Table 4 (6 values) | 0.4715 | 0.1793 | 0.2353 |
+| paper Table 3 (99 values) | 0.5998 | 0.1322 | 0.2016 |
+| paper Table 4 (6 values) | 0.6031 | 0.2550 | 0.3481 |
 
 **Table 3 is not reproduced** (the table is printed to 0.01). The new-crustal
 masses inverted from Table 3 and from Table 4 differ by about 13 sigma, which

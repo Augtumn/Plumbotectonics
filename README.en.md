@@ -157,10 +157,10 @@ Tables 3 and 4:
 
 | Data | max absolute difference | mean | RMSE |
 |---|---|---|---|
-| paper Table 3 (99 growth-curve values) | 0.6211 | 0.2199 | 0.2719 |
-| paper Table 4 (6 present-day values) | 0.4715 | 0.1793 | 0.2353 |
+| paper Table 3 (99 growth-curve values) | 0.5998 | 0.1322 | 0.2016 |
+| paper Table 4 (6 present-day values) | 0.6031 | 0.2550 | 0.3481 |
 
-> **Table 3 is not reproduced** (the table is printed to 0.01 and only 12/99
+> **Table 3 is not reproduced** (the table is printed to 0.01 and only 11/99
 > fall inside +-0.005). The new-crustal masses inverted from the two tables
 > differ by about 13 sigma, showing that **the paper's two tables are mutually
 > incompatible**; the paper also has 5 further inconsistencies between its text
@@ -176,7 +176,7 @@ Results are pinned by three independent layers; see
    reproduces all 126 values of Zartman & Doe (1981), Table IV (worst 0.00509,
    the printing precision) and the 12 element abundances of Table II section
    III.B (within 1 %); the China model reproduces the paper's Table 4 (worst
-   0.4715) - Table 3 is explicitly listed as **not reproduced** and is pinned by
+   0.6031) - Table 3 is explicitly listed as **not reproduced** and is pinned by
    regression ceilings in `tests/test_china.py`.
 2. **Invariants** - total mass is conserved exactly in all three models
    (Version I: 800; Version IV: 1050; China model: 800), and the China model

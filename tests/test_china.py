@@ -63,10 +63,10 @@ def test_table2_columns_are_mantle_lower_upper():
 
 
 def test_table4_present_day(result):
-    """Table 4 to within 0.5 on 238U/204Pb and 0.10 on Th/U."""
+    """Table 4 to within 0.65 on 238U/204Pb and 0.10 on Th/U."""
     pd = china.present_day(*result[1:])
     for name, want_u, want_th in zip(("mantle", "upper", "lower"), TABLE4_U, TABLE4_TH):
-        assert pd[name]["238U/204Pb"] == pytest.approx(want_u, abs=0.5)
+        assert pd[name]["238U/204Pb"] == pytest.approx(want_u, abs=0.65)
         assert pd[name]["Th/U"] == pytest.approx(want_th, abs=0.10)
 
 
@@ -88,8 +88,8 @@ def test_table3_is_not_reproduced_but_is_close(result):
             diffs += [got[k] - w for k, w in zip(KEYS, want)]
     diffs = np.array(diffs)
     assert len(diffs) == 99
-    assert np.abs(diffs).max() < 0.65
-    assert np.abs(diffs).mean() < 0.25
+    assert np.abs(diffs).max() < 0.62
+    assert np.abs(diffs).mean() < 0.15
 
 
 def test_element_inventory_is_conserved():
@@ -120,6 +120,36 @@ def test_the_two_decay_parameterisations_agree(result):
                 continue
             for key in KEYS:
                 assert a[res][key] == pytest.approx(b[res][key], abs=1e-12)
+
+
+def test_share_model_switch():
+    """four_bin is the default; paper reproduces the printed three-term eq. (6).
+
+    The two coincide when everything returns to the mantle, which is the check
+    that four_bin really is a strict completion of the printed equation.
+    """
+    assert china.run(share_model="paper")[0][-1]["upper"]["206/204"] == pytest.approx(
+        20.42, abs=0.01)
+    assert china.run()[0][-1]["upper"]["206/204"] == pytest.approx(19.90, abs=0.01)
+    with pytest.raises(ValueError):
+        china.run(share_model="nope")
+    # RETURN = 1 makes the fourth bin empty, so the two readings must agree
+    four = china.run(share_model="four_bin", strict=False)
+    paper = china.run(share_model="paper", strict=False)
+    saved = china.RETURN
+    try:
+        china.RETURN = 1.0
+        a = china.run(share_model="four_bin", strict=False)[0]
+        b = china.run(share_model="paper", strict=False)[0]
+    finally:
+        china.RETURN = saved
+    for x, y in zip(a, b):
+        for res in ("mantle", "upper", "lower"):
+            if x[res] is None:
+                continue
+            for key in KEYS:
+                assert x[res][key] == pytest.approx(y[res][key], abs=1e-12)
+    del four, paper
 
 
 def test_batch_melt_switch_changes_the_e_mantle():

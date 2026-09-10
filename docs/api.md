@@ -145,6 +145,7 @@ Version IV 的摩尔分配函数（见 [`theory.md`](theory.md) §3.6）。**逐
 |---|---|---|
 | `decay_parents` | `False` | `False` = ZD1981 母体常数化；`True` = 论文 eqs. (9)(10) 母体真衰变（²³⁵U 独立跟踪）。**两者逐位等价** |
 | `melt_model` | `"zd1981"` | `"zd1981"` = $E_m$ 恒为 4；`"batch"` = 批式熔融 $E=1/f_m$ |
+| `share_model` | `"four_bin"` | eq. (6) 的归一化因子读法：`"four_bin"` = 四项（那 10 % 用 $F^u$，物理自洽，**默认**）；`"paper"` = 论文印刷的三项（那 10 % 用 $F^o$）。`RETURN = 1` 时两者完全一致。见 [`validation.md`](validation.md) §5.4 |
 | `strict` | `True` | 结束时断言元素总量守恒，违反则抛 `AssertionError` |
 
 返回 `(history, mantle, upper_segs, lower_segs)`：

@@ -156,6 +156,7 @@ by the paper is inherited from ZD1981).
 |---|---|---|
 | `decay_parents` | `False` | `False` = ZD1981 constant parents; `True` = the paper's eqs. (9)(10), parents really decay (235U tracked separately). **The two are equivalent digit for digit** |
 | `melt_model` | `"zd1981"` | `"zd1981"` = $E_m$ fixed at 4; `"batch"` = batch melting $E=1/f_m$ |
+| `share_model` | `"four_bin"` | reading of the eq. (6) normalisation: `"four_bin"` = four terms, the 10 % weighted with $F^u$ (physically self-consistent, **default**); `"paper"` = the printed three terms, the 10 % weighted with $F^o$. The two coincide when `RETURN = 1`. See validation.md section 5.4 |
 | `strict` | `True` | assert element-inventory conservation at the end, raising `AssertionError` on violation |
 
 Returns `(history, mantle, upper_segs, lower_segs)`:

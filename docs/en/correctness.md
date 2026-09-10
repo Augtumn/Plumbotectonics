@@ -51,7 +51,7 @@ Full comparison in [`validation.md`](validation.md) section 2.
 
 | Data | Items | max absolute difference | mean | RMSE | Criterion |
 |---|---|---|---|---|---|
-| paper Table 4 (present-day `238U/204Pb`, `Th/U`) | 6 | 0.4715 | 0.1793 | 0.2353 | `abs < 0.5` / `abs < 0.10` (`Th/U`) |
+| paper Table 4 (present-day `238U/204Pb`, `Th/U`) | 6 | 0.4715 | 0.1793 | 0.2353 | `abs < 0.65` / `abs < 0.10` (`Th/U`) |
 | paper Table 3 (growth curves) | 99 | 0.6211 | 0.2199 | 0.2719 | **not reproduced**, pinned only by the regression ceilings 0.65 / 0.25 |
 
 The model has **zero free parameters**: the initial abundances, the new-crustal
@@ -110,9 +110,10 @@ because the parents themselves decay to today's 349.
 - Version IV `history` has exactly 46 entries, `cycle` 1-46, time 4.4 -> 0.0 Ga;
 - Version IV `total[h] == mantle[h] + upper[h] + lower[h] + sub[h]` (h = 1..6);
 - Version IV mantle `206Pb/204Pb` increases monotonically with geological time;
-- the China model adds exactly one upper-crust layer, one sediment layer (the
-  10 % residual orogene) and one lower-crust layer per cycle, i.e. 11 x 3
-  upper-side layers and 11 lower-side layers;
+- the China model adds three layers per cycle: two on the upper-crust side (the
+  newly formed upper crust and the sediment layer built from the 10 % residual
+  orogene) and one on the lower-crust side (the newly formed lower crust), so
+  33 layers over the 11 cycles;
 - the China model's present-day `238U/204Pb` over mantle, upper and lower crust
   satisfies upper crust > mantle > lower crust, and `206Pb/204Pb` follows the
   same order -- this is the premise of all the paper's source-discrimination

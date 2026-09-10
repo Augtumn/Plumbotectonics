@@ -319,14 +319,14 @@ inherited. This implementation therefore has **zero free parameters**.
 
 | Data | max absolute difference | mean | RMSE | max relative |
 |---|---|---|---|---|
-| paper Table 3 (99 growth-curve values) | **0.6211** | 0.2199 | 0.2719 | 3.557 % |
-| paper Table 4 (6 present-day values) | **0.4715** | 0.1793 | 0.2353 | 4.300 % |
+| paper Table 3 (99 growth-curve values) | **0.5998** | 0.1322 | 0.2016 | 3.099 % |
+| paper Table 4 (6 present-day values) | **0.6031** | 0.2550 | 0.3481 | 6.225 % |
 
-Table 3 is printed to 0.01, and only **12/99** fall inside +-0.005. **Table 3 is
+Table 3 is printed to 0.01, and only **11/99** fall inside +-0.005. **Table 3 is
 not reproduced.**
 
 The qualitative features (on which the whole argument of the paper rests) do
-hold: upper crust 20.42 > mantle 17.49 > lower crust 17.25 (paper
+hold: upper crust 19.90 > mantle 17.32 > lower crust 17.14 (paper
 19.86 > 17.92 > 17.10).
 
 ### 5.3 Why Table 3 cannot be reproduced
@@ -354,7 +354,43 @@ Even freeing all three parameters in a fit only pushes the worst Table 3
 deviation down to 0.29 (with Table 4 blowing up to 1.96), which shows that the
 residual deviation is **structural**, not a calibration problem.
 
-### 5.4 Internal inconsistencies in the paper (5 located)
+### 5.4 eq. (6) conflicts with its own gloss (readings A and B)
+
+The paper prints eq. (6) with **three** terms:
+
+$$s = \Delta M_o^t \cdot F^o + M_u^t \cdot F^u + M_l^t \cdot F^l$$
+
+but its gloss defines $F^o$ as the coefficient of "the residual orogene, i.e.
+the part returning to the mantle", while eq. (7) sends only **90 %** of that
+residual back to the mantle.  The paper never says whether the remaining 10 %
+should be weighted with $F^o$ or with $F^u$.  Two readings:
+
+| | `share_model="paper"` (A) | `share_model="four_bin"` (B, **default**) |
+|---|---|---|
+| $s$ | three terms, the whole residual weighted with $F^o$ | four terms: $0.9M_{res}F^o + 0.1M_{res}F^u + M_u F^u + M_l F^l$ |
+| coefficient for the 10 % | $F^o$ (the mantle's) | $F^u$ (the upper crust's) |
+| physically self-consistent | no -- material that is stated to become sediment is shared out with the mantle's coefficient | yes -- every destination uses its own coefficient |
+| when `RETURN = 1` | the two **coincide exactly** (the fourth bin is empty) | same |
+
+Both conserve mass and elements exactly, so the conservation check cannot tell
+them apart; only physical judgement and the quality of the fit can.
+
+**Measured** (no tuned parameters, everything else identical):
+
+| | Table 3 max | Table 3 mean | Table 3 RMSE | Table 4 max | upper/mantle/lower 206Pb/204Pb |
+|---|---|---|---|---|---|
+| A `"paper"` | 0.6211 | 0.2199 | 0.2719 | **0.4715** | 20.42 / 17.49 / 17.25 |
+| **B `"four_bin"`** | **0.5998** | **0.1322** | **0.2016** | 0.6031 | **19.90** / 17.32 / **17.14** |
+| paper | — | — | — | — | 19.86 / 17.92 / 17.10 |
+
+B is better across Table 3 (mean deviation improved by 40 %) and moves the
+**upper crust's 206Pb/204Pb from 20.42 to 19.90** against the paper's 19.86.
+Upper/lower crust differentiation is the paper's central claim, and A misses the
+upper crust by 0.56.  **This implementation therefore takes B as the default**:
+the authors' own code most likely used B's logic and the printed eq. (6) simply
+dropped the fourth term.  A remains available as a switch.
+
+### 5.5 Internal inconsistencies in the paper (5 located)
 
 | # | Location | What it says | Evidence |
 |---|---|---|---|
@@ -364,7 +400,7 @@ residual deviation is **structural**, not a calibration problem.
 | 4 | Table 4 footnote | lower crust 6.94 | Zartman & Haines (1988) actually give 6.49, a **digit transposition** |
 | 5 | body text vs Table 4 footnote | the text compares against Zartman and Doe (1981), the footnote cites Z&H (1988) | the values (10.01, 11.08) are digit-for-digit Z&H's version IV; and only against Z&H does the "Th-rich" claim hold (3.60 vs 2.73; against ZD1981's 3.57 the difference is only 0.03) |
 
-### 5.5 Two physics bugs fixed during development
+### 5.6 Two physics bugs fixed during development
 
 Both used to give **better-looking but wrong** accuracy; they are recorded here
 so they are not repeated:
@@ -381,14 +417,14 @@ so they are not repeated:
 > `tests/test_china.py::test_element_inventory_is_conserved` and
 > `::test_the_mass_of_the_system_is_constant`.
 
-### 5.6 Two switchable physical conventions
+### 5.7 Two switchable physical conventions
 
 | Switch | Default | Alternative | Notes |
 |---|---|---|---|
 | `decay_parents` | `False` (ZD1981: constant parents, $\Delta d = e^{\lambda t}-e^{\lambda t'}$, 207 fed by 238U/137.88) | `True` (paper eqs. 9-10: parents really decay, 235U tracked separately, 4.0 Ga 238U/235U = 4.9897) | **the two are equivalent digit for digit** (maximum difference $2.1\times10^{-14}$), because "constant + 349/1335" and "decaying + back-calculated 649/1627" are the same thing |
 | `melt_model` | `"zd1981"` ($E_m$ fixed at 4) | `"batch"` ($E=1/f_m$) | the paper says $E_m=4$ corresponds to "25 % melting", while $f_m$ falls from 1/8 to 1/128 -- the two are inconsistent; under batch melting a perfectly incompatible element should have $E=1/f_m$ (8...128). Measured, batch is actually worse (Table 3 max 1.18), so the default keeps the paper's convention |
 
-### 5.7 Known limitations (of the framework itself, not implementation bugs)
+### 5.8 Known limitations (of the framework itself, not implementation bugs)
 
 - **Pb is treated as a refractory element**: it is separated from U and Th only
   by the partition ratios, with no distinction between its behaviour in partial
@@ -398,7 +434,7 @@ so they are not repeated:
 - **The orogene homogenises instantaneously**: this is the paper's assumption
   (3a), not an implementation choice.
 
-### 5.8 Reproduction
+### 5.9 Reproduction
 
 ```bash
 uv run python scripts/run_china.py     # print growth curves and comparison statistics, write outputs/results/china_comparison.csv
