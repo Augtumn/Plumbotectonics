@@ -133,4 +133,10 @@ Version IV 以 Haines & Zartman (1988) Table 4 的现今值为标定目标。low
 
 文献 3 给出造山带双向物质交换（bi-directional transport）的物理依据，对应本项目的 gates 实现。
 
-`papers/` 收录了文献 1 与 2 的 PDF；文献 3 未附本地副本。
+`papers/` 收录了三篇文献的 PDF：
+
+| 文献 | 本地文件 |
+|---|---|
+| 1 Haines & Zartman (1988) | `papers/Haines_Zartman_1988_PLUMBO.pdf` |
+| 2 Zartman & Doe (1981) | `papers/Zartman_Doe_1981_Plumbotectonics.pdf` |
+| 3 Zartman & Haines (1988) | `papers/Zartman_Haines_1988_Bidirectional.pdf` |
