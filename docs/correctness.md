@@ -120,12 +120,12 @@ $$
 ## 8. 如何自查
 
 ```bash
-pip install -e . pytest
-pytest -q                      # 三层一起跑
-pytest -q tests/test_conservation.py   # 只跑不变量
+uv sync --extra dev
+uv run pytest -q                      # 三层一起跑
+uv run pytest -q tests/test_conservation.py   # 只跑不变量
 ```
 
-不装 pytest 时，可直接运行测试函数：
+不想用 pytest 时，也可以直接用解释器运行测试函数：
 
 ```python
 import sys
@@ -160,11 +160,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: astral-sh/setup-uv@v5
         with:
           python-version: "3.12"
-      - run: pip install -e . pytest
-      - run: pytest -q
+      - run: uv sync --extra dev
+      - run: uv run pytest -q
 ```
 
 ## 11. 参考文献

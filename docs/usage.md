@@ -9,36 +9,23 @@
 
 ## 2. 安装
 
-推荐以可编辑模式安装：
+本项目用 [uv](https://docs.astral.sh/uv/) 管理环境与依赖：
 
 ```bash
-pip install -e .
-# 或
-uv pip install -e .
+uv sync              # 创建 .venv 并安装运行依赖
+uv sync --extra dev  # 需要 pytest 时追加开发依赖
 ```
 
-不安装时，把 `src` 加入 `PYTHONPATH` 即可：
-
-```bash
-# bash
-PYTHONPATH=src python scripts/run_version1.py
-```
-
-```powershell
-# PowerShell
-$env:PYTHONPATH = "src"
-python scripts\run_version1.py
-```
-
-> `scripts/*.py` 直接 `import plumbotectonics`。未安装且未设置 `PYTHONPATH`
-> 时会报 `ModuleNotFoundError: No module named 'plumbotectonics'`。
+> `scripts/*.py` 直接 `import plumbotectonics`，所以请用 `uv run` 执行
+> （`uv sync` 后激活 `.venv` 亦可），否则会报
+> `ModuleNotFoundError: No module named 'plumbotectonics'`。
 
 ## 3. 命令行
 
 ### 3.1 Version I
 
 ```bash
-python scripts/run_version1.py
+uv run python scripts/run_version1.py
 ```
 
 打印 11 个旋回在 `206/204`、`207/204`、`208/204` 上的
@@ -47,7 +34,7 @@ python scripts/run_version1.py
 ### 3.2 Version IV（Table 4 对比）
 
 ```bash
-python scripts/run_version4.py
+uv run python scripts/run_version4.py
 ```
 
 把 `dp=0.14` 的模型结果与 Haines & Zartman (1988) Table 4 的 24 个数值
@@ -59,7 +46,7 @@ CSV 列：`reservoir`、`ratio`、`model`、`table`、`abs_diff`。
 ### 3.3 生长曲线图
 
 ```bash
-python scripts/plot_growth_curves.py
+uv run python scripts/plot_growth_curves.py
 ```
 
 生成到 `outputs/figures/`：
@@ -142,7 +129,7 @@ outputs/
 ## 6. 测试
 
 ```bash
-pytest
+uv run pytest
 ```
 
 `pyproject.toml` 已配置 `pythonpath = ["src"]` 与 `testpaths = ["tests"]`，
@@ -152,9 +139,9 @@ pytest
 
 | 现象 | 原因 | 处理 |
 |---|---|---|
-| `ModuleNotFoundError: plumbotectonics` | 未安装、未设 `PYTHONPATH` | `pip install -e .` 或 `PYTHONPATH=src` |
-| `No module named pytest` | 未装测试依赖 | `pip install pytest` |
-| `ImportError: Can't determine version for pytz` | pandas 与 pytz 版本不匹配 | `pip install -U --force-reinstall pytz pandas` |
+| `ModuleNotFoundError: plumbotectonics` | 未执行 `uv sync`，或未用 `uv run` | `uv sync`，并用 `uv run` 执行脚本 |
+| `No module named pytest` | 未装开发依赖 | `uv sync --extra dev` |
+| `ImportError: Can't determine version for pytz` | pandas 与 pytz 版本不匹配 | `uv pip install -U --force-reinstall pytz pandas` |
 | 图中中文显示为方块 | 缺少中文字体 | 安装 `Microsoft YaHei`/`SimHei`，或修改 `plotting.py` 的字体列表 |
 | `run_version4.py` 较慢 | 46 个旋回 × 6 种同位素 | 正常，通常几秒内完成 |
 

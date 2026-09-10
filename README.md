@@ -31,33 +31,21 @@ Version IV（PLUMBO）增加了洋中脊（MOR）储库、次地壳岩石圈、�
 
 ## 安装
 
-```bash
-pip install -e .
-# 或
-uv pip install -e .
-```
-
-要求 Python >= 3.10，依赖 `numpy`、`pandas`、`matplotlib`。
-
-不想安装时，把 `src` 加入 `PYTHONPATH` 即可：
+本项目用 [uv](https://docs.astral.sh/uv/) 管理环境与依赖，要求 Python >= 3.10：
 
 ```bash
-# bash / Git Bash
-PYTHONPATH=src python scripts/run_version1.py
+uv sync              # 创建 .venv 并安装运行依赖
+uv sync --extra dev  # 需要 pytest 时追加开发依赖
 ```
 
-```powershell
-# PowerShell
-$env:PYTHONPATH = "src"
-python scripts\run_version1.py
-```
+运行依赖为 `numpy`、`pandas`、`matplotlib`。
 
 ## 运行
 
 ```bash
-python scripts/run_version1.py        # Version I 生长史（打印到终端）
-python scripts/run_version4.py        # 与 Table 4 对比 -> outputs/results/
-python scripts/plot_growth_curves.py  # 生长曲线图 -> outputs/figures/
+uv run python scripts/run_version1.py        # Version I 生长史（打印到终端）
+uv run python scripts/run_version4.py        # 与 Table 4 对比 -> outputs/results/
+uv run python scripts/plot_growth_curves.py  # 生长曲线图 -> outputs/figures/
 ```
 
 生成的表格与图形写入 `outputs/`。
@@ -85,7 +73,7 @@ python scripts/plot_growth_curves.py  # 生长曲线图 -> outputs/figures/
 ## 测试
 
 ```bash
-pytest
+uv run pytest
 ```
 
 覆盖范围：Version I 的初始与现今地幔比值、Version IV 四个储库对 Table 4 的

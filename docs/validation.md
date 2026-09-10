@@ -134,9 +134,9 @@ docstring 与 `import math` 之后。
 ## 5. 如何复现校验
 
 ```bash
-pip install -e .
-pytest
-python scripts/run_version4.py
+uv sync --extra dev
+uv run pytest -q
+uv run python scripts/run_version4.py
 ```
 
 或不安装、不依赖 pandas：
