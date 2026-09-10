@@ -134,9 +134,13 @@ pt.v4_ratios(pt.run_version4()["mantle"])
 outputs/
 |-- figures/   # version1_growth_curves.{png,pdf}, version4_growth_curves.{png,pdf}
 `-- results/   # version1_comparison.csv, version4_comparison.csv
+    `-- literature/   # source images of the literature values (static, not generated)
 ```
 
-Directories are created automatically at run time. Both CSVs have exactly the same column layout, so they can be concatenated directly.
+`figures/` and `results/*.csv` are created automatically at run time;
+`results/literature/` holds static images committed with the repository (see its
+`README.md`). Both CSVs have exactly the same column layout, so they can be
+concatenated directly.
 
 ## 6. Tests
 

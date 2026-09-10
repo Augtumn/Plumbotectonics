@@ -54,10 +54,14 @@ Final masses ($10^{24}$ g):
 
 ### 1.1 About the lower-crust 6.4903
 
-Some copies of Table 4 print the lower-crust `238U/204Pb` as **6.1903**, which
-is inconsistent with the rest of the row; this repository uses the
-self-consistent value **6.4903** as the target, and the model gives 6.4903
-(diff +0.00003).
+The **PDF text layer** of Table 4 reads the lower-crust `238U/204Pb` as
+**6.1903**, which is inconsistent with the rest of the row; the **scan actually
+prints `6.49030`**. This repository uses the value in the image, **6.4903**, as
+the target, and the model gives 6.4903 (diff +0.00003).
+
+The misread comes from the text layer being scan OCR with a systematic `4` ->
+`1` confusion; for the related entries that are still uncorrected see
+section 4.8.
 
 ### 1.2 Calibration
 

@@ -24,7 +24,7 @@
 | `V4_MASS0` … `V4_CYCLES` | 见文件 | Version IV 初始条件与开关 |
 
 > 注意：`version1.py` 与 `version4.py` 目前各自硬编码了这些常量，
-> 修改 `constants.py` 不会影响两个模型（见 [`validation.md`](validation.md) §3.2）。
+> 修改 `constants.py` 不会影响两个模型（见 [`validation.md`](validation.md) §4.2）。
 
 ## `plumbotectonics.version1`
 

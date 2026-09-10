@@ -13,10 +13,10 @@ the scope of the guarantee. The raw validation data is in
 |---|---|---|
 | 1. Baseline | compare against the printed values of the papers | `tests/test_version1.py`, `tests/test_version4.py` |
 | 2. Invariants | conservation laws and structural constraints | `tests/test_conservation.py` |
-| 3. Regression | rerun 1+2 on every change | `pytest` (includes the figure layout check in `tests/test_plotting.py`) |
+| 3. Regression | rerun 1+2 on every change | `pytest` (includes the figure layout and PDF-timestamp checks in `tests/test_plotting.py`) |
 
 Only when all three pass is a result considered "correct under the model
-definition". Current status: **18/18 passing**.
+definition". Current status: **19/19 passing**.
 
 ## 2. Layer 1: baseline validation
 
@@ -123,6 +123,22 @@ cannot propagate:
 `tests/test_conservation.py` covers both `FNEmoles` guards and the zero
 denominator branches of `ratios`.
 
+**Measured floating-point accuracy** (the models use only the standard-library
+`math`, not numpy):
+
+| Item | Measured |
+|---|---|
+| whole model, float64 vs a 60-digit Decimal re-run (all of Version I) | worst relative difference **8.4e-16** (about 4 ulp) |
+| final 204Pb, 238U | **bit-identical** |
+| 11 / 46 term sums: `sum()` vs `math.fsum()` vs reversed order | **bit-identical** |
+| `math.exp` vs `np.exp` over the 66 + 276 exponents the models use | **bit-identical** |
+
+The floating-point error is 12 orders of magnitude below the 0.005 tolerance of
+Table IV; what actually limits the model is the number of digits the paper
+prints and the parameters themselves, not the numeric format. Switching to numpy
+would not change a single digit (`math.exp` calls the platform libm, usually
+<1 ulp, whereas numpy's transcendentals are not guaranteed correctly rounded).
+
 ## 6. Reproducibility
 
 - **No third-party dependencies**: both model cores (`version1.py`,
@@ -131,7 +147,9 @@ denominator branches of `ratios`.
   statistics in `scripts/` (`np.max`/`np.sqrt`/`np.mean`) and `matplotlib` only
   for plotting;
 - **Fully deterministic**: no random numbers, no timestamps, no
-  order-dependent parallel reductions;
+  order-dependent parallel reductions; `plotting.py` explicitly clears the
+  `CreationDate` PDF metadata entry, which matplotlib would otherwise populate
+  with the wall-clock time and make the PDF figures non-reproducible;
 - **Inputs inline**: initial conditions and Table 3 parameters are declared as
   constants/arrays in the source, with their provenance;
 - **Versioned**: `pyproject.toml` declares `version = "0.1.0"` and dependency
@@ -143,7 +161,7 @@ The same environment and version reproduce bit-identical results.
 
 | Issue | Handling |
 |---|---|
-| Some copies of Table 4 print lower-crust `238U/204Pb` as 6.1903, inconsistent with the row | the self-consistent **6.4903** is used as the target and documented |
+| The PLUMBO Table 4 **text layer** is scan OCR that misreads `4` as `1` | the **image** is authoritative; two subcrustal targets still carry the misread values, see [`validation.md`](validation.md) section 4.8 |
 | The printed Table 3 enrichment factors (integers) do not reproduce Table 4 | **calibrated** values are used (`E_a2` ... `F_c3`, `INIT_RATIOS`); the printed ones stay as an order-of-magnitude reference |
 | Two orogene `208Pb/204Pb` cells of Table IV are OCR errors | corrected values (30.55 / 35.77) are used, and the corrected model now confirms them independently, see [`validation.md`](validation.md) section 4.6 |
 | `history['orogene']` used to miss the proximal and wedge components | fixed, see [`validation.md`](validation.md) section 4.1 |
@@ -192,7 +210,7 @@ geological argument, which is beyond this document.
 ## 10. CI suggestion
 
 ```yaml
-# .github/workflows/tests.yml
+# .github/workflows/tests.yml   (suggested content; this repository does not ship the file)
 name: tests
 on: [push, pull_request]
 jobs:

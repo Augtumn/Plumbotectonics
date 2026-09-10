@@ -15,7 +15,8 @@ Plumbotectonics 是一类质量平衡模型：把地球浅部划分为若干长�
 - 纯 Python 实现 **Version I**（Zartman & Doe, 1981）与
   **Version IV**（Haines & Zartman, 1988）两个模型；
 - 复现 Haines & Zartman (1988) Table 4 的全部 24 个现今值
-  （最差绝对偏差 **0.00993**，测试容差 0.02）；
+  （最差绝对偏差 **0.00993**，测试容差 0.02）；其中 sub 库两个目标值取自
+  扫描 OCR 的误读，**尚未修正**，见 [`docs/validation.md`](docs/validation.md) §4.8；
 - 复现 Zartman & Doe (1981) Table IV 的全部 126 个生长曲线值
   （最差绝对偏差 **0.00509**，即该表两位小数的印刷极限）；
 - 内置两版本的生长曲线绘图（600 dpi PNG + 矢量 PDF）。
@@ -66,7 +67,7 @@ uv run python scripts/plot_growth_curves.py  # 生长曲线图 -> outputs/figure
 | [`docs/theory.md`](docs/theory.md) | [`docs/en/theory.md`](docs/en/theory.md) | 计算原理：两版本的质量/同位素传输、分配函数与衰变 |
 | [`docs/usage.md`](docs/usage.md) | [`docs/en/usage.md`](docs/en/usage.md) | 安装、命令行、Python API 与故障排查 |
 | [`docs/api.md`](docs/api.md) | [`docs/en/api.md`](docs/en/api.md) | 模块、函数、参数与返回数据结构 |
-| [`docs/validation.md`](docs/validation.md) | [`docs/en/validation.md`](docs/en/validation.md) | Table 4 校验数据、标定说明与已知问题 |
+| [`docs/validation.md`](docs/validation.md) | [`docs/en/validation.md`](docs/en/validation.md) | Table IV / Table 4 校验数据、文献原图、标定说明与已知问题 |
 | [`docs/correctness.md`](docs/correctness.md) | [`docs/en/correctness.md`](docs/en/correctness.md) | 结果正确性保证：三层保证体系、守恒不变量、CI |
 
 ## 目录结构
@@ -76,7 +77,8 @@ uv run python scripts/plot_growth_curves.py  # 生长曲线图 -> outputs/figure
 - `scripts/` — 命令行入口
 - `tests/` — pytest 校验套件
 - `papers/` — 原始论文
-- `outputs/` — 生成的表格与图形
+- `outputs/` — 生成的表格与图形；`outputs/results/literature/` 是两张对比表
+  所引文献值的**原始出处截图**（非生成物）
 - `docs/` — 中文文档，`docs/en/` — English documentation
 
 ## 测试
@@ -88,14 +90,14 @@ uv run pytest
 覆盖范围：Version I 对 Table IV 全部 126 项（11 个旋回 × 4 个储库 × 3 个比值，
 容差 0.006）与 Table II 第三节 B 的 12 项元素丰度、Version IV 四个储库对
 Table 4 的 24 项比对（`abs(diff) < 0.02`）、两个模型的质量守恒与结构不变量
-（`tests/test_conservation.py`）以及图形布局（标题不得与面板标题重叠，
-`tests/test_plotting.py`）。当前状态：**18/18 通过**。
+（`tests/test_conservation.py`）以及图形布局与 PDF 可复现性（标题不得与面板
+标题重叠、PDF 不得带时间戳，`tests/test_plotting.py`）。当前状态：**19/19 通过**。
 
 ## 校验
 
 Version IV 以 Haines & Zartman (1988) Table 4 的现今值为标定目标。lower 库
-用于校验的 `238U/204Pb` 取自洽值 **6.4903**（部分版本印作 6.1903，与同行其它
-数值不自洽）。
+用于校验的 `238U/204Pb` 取扫描图上的真值 **6.4903**（PDF 文本层的 OCR 把它
+误读成 6.1903）。
 
 `dp=0.14`、46 个旋回下与 Table 4 的最差偏差：
 
@@ -105,6 +107,10 @@ Version IV 以 Haines & Zartman (1988) Table 4 的现今值为标定目标。low
 | 上地壳 | 0.00017 | 207Pb/204Pb |
 | 下地壳 | 0.00033 | 232Th/204Pb |
 | 次地壳 | 0.00993 | 232Th/204Pb |
+
+> **注意**：次地壳的 `207Pb/204Pb` 与 `232Th/204Pb` 两个目标值本身仍是文本层
+> 的误读（图上为 15.44000 / 35.54200，本表用的是 15.110 / 35.512），因此这两
+> 项的"通过"不成立。详见 [`docs/validation.md`](docs/validation.md) §4.8。
 
 完整对照表见 [`docs/validation.md`](docs/validation.md)。
 

@@ -18,7 +18,9 @@ occurs.
 - Pure-Python implementations of **Version I** (Zartman & Doe, 1981) and
   **Version IV** (Haines & Zartman, 1988);
 - Reproduces all 24 present-day values of Haines & Zartman (1988), Table 4
-  (worst absolute deviation **0.00993**, test tolerance 0.02);
+  (worst absolute deviation **0.00993**, test tolerance 0.02); two of those
+  targets come from scan-OCR misreads and are **not yet corrected**, see
+  [`docs/en/validation.md`](docs/en/validation.md) section 4.8;
 - Reproduces all 126 growth-curve values of Zartman & Doe (1981), Table IV
   (worst absolute deviation **0.00509**, the two-decimal printing limit);
 - Publication-style growth curves for both models (600 dpi PNG + vector PDF).
@@ -74,7 +76,7 @@ Full documentation is available in both languages:
 | [`docs/en/theory.md`](docs/en/theory.md) | [`docs/theory.md`](docs/theory.md) | Theory: mass and isotope transfer, partition functions and decay |
 | [`docs/en/usage.md`](docs/en/usage.md) | [`docs/usage.md`](docs/usage.md) | Install, CLI, Python API and troubleshooting |
 | [`docs/en/api.md`](docs/en/api.md) | [`docs/api.md`](docs/api.md) | Modules, functions, parameters and return structures |
-| [`docs/en/validation.md`](docs/en/validation.md) | [`docs/validation.md`](docs/validation.md) | Table 4 comparison, calibration notes and known issues |
+| [`docs/en/validation.md`](docs/en/validation.md) | [`docs/validation.md`](docs/validation.md) | Table IV / Table 4 comparison, source images, calibration notes and known issues |
 | [`docs/en/correctness.md`](docs/en/correctness.md) | [`docs/correctness.md`](docs/correctness.md) | Correctness guarantees: three layers, invariants, CI |
 
 ## Layout
@@ -84,7 +86,9 @@ Full documentation is available in both languages:
 - `scripts/` - command-line entry points
 - `tests/` - pytest validation suite
 - `papers/` - source papers
-- `outputs/` - generated tables and figures
+- `outputs/` - generated tables and figures; `outputs/results/literature/` holds
+  the **source images** of the literature values the two comparison tables quote
+  (not generated)
 - `docs/` - documentation (Chinese), `docs/en/` (English)
 
 ## Tests
@@ -97,15 +101,16 @@ Coverage: all 126 Table IV rows of Version I (11 cycles x 4 reservoirs x 3
 ratios, tolerance 0.006) and the 12 element abundances of Table II section
 III.B, the 24 Table 4 ratios of the four Version IV reservoirs
 (`abs(diff) < 0.02`), and the mass-conservation and structural invariants of
-both models (`tests/test_conservation.py`) plus the figure layout
-(`tests/test_plotting.py`). Current status: **18/18 passing**.
+both models (`tests/test_conservation.py`) plus the figure layout and PDF
+reproducibility (`tests/test_plotting.py`: no titled overlap, no embedded
+timestamp). Current status: **19/19 passing**.
 
 ## Validation
 
 Version IV is calibrated against the present-day values of Haines & Zartman
-(1988), Table 4. The lower-crust `238U/204Pb` used for validation is the
-self-consistent value **6.4903** (some copies of the table print 6.1903,
-which is inconsistent with the rest of the row).
+(1988), Table 4. The lower-crust `238U/204Pb` used for validation is the value
+printed in the scan, **6.4903** (the PDF text layer's OCR misreads it as
+6.1903).
 
 Worst deviation from Table 4 at `dp=0.14` over 46 cycles:
 
@@ -115,6 +120,11 @@ Worst deviation from Table 4 at `dp=0.14` over 46 cycles:
 | upper crust | 0.00017 | 207Pb/204Pb |
 | lower crust | 0.00033 | 232Th/204Pb |
 | subcrustal | 0.00993 | 232Th/204Pb |
+
+> **Caveat**: the subcrustal `207Pb/204Pb` and `232Th/204Pb` targets are
+> themselves text-layer misreads (the image prints 15.44000 / 35.54200, this
+> table uses 15.110 / 35.512), so those two rows do not actually pass. See
+> [`docs/en/validation.md`](docs/en/validation.md) section 4.8.
 
 See [`docs/en/validation.md`](docs/en/validation.md) for the full table.
 

@@ -25,7 +25,7 @@
 
 > Note: `version1.py` and `version4.py` currently hard-code their own copies of
 > these values, so editing `constants.py` does not affect either model (see
-> [`validation.md`](validation.md) section 3.2).
+> [`validation.md`](validation.md) section 4.2).
 
 ## `plumbotectonics.version1`
 

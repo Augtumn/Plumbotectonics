@@ -132,9 +132,12 @@ pt.v4_ratios(pt.run_version4()["mantle"])
 outputs/
 ├── figures/   # version1_growth_curves.{png,pdf}, version4_growth_curves.{png,pdf}
 └── results/   # version1_comparison.csv, version4_comparison.csv
+    └── literature/   # 两张表所引文献值的原始出处截图（静态资源，非生成物）
 ```
 
-目录会在运行时自动创建。两份 CSV 的列结构完全相同，可直接拼接分析。
+`figures/` 与 `results/*.csv` 会在运行时自动创建；`results/literature/` 是随
+仓库提交的静态图片（见其 `README.md`）。两份 CSV 的列结构完全相同，可直接
+拼接分析。
 
 ## 6. 测试
 

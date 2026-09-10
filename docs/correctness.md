@@ -11,9 +11,9 @@
 |---|---|---|
 | ① 基准校验 | 与论文印刷值逐项对比 | `tests/test_version1.py`、`tests/test_version4.py` |
 | ② 不变量校验 | 守恒量与结构约束 | `tests/test_conservation.py` |
-| ③ 回归测试 | 每次改动重跑 ①+② | `pytest`（含 `tests/test_plotting.py` 图形布局检查） |
+| ③ 回归测试 | 每次改动重跑 ①+② | `pytest`（含 `tests/test_plotting.py` 的图形布局与 PDF 无时间戳检查） |
 
-三层全部通过，才认为结果"在模型定义下正确"。当前实测：**18/18 通过**。
+三层全部通过，才认为结果"在模型定义下正确"。当前实测：**19/19 通过**。
 
 ## 2. ① 基准校验
 
@@ -110,6 +110,19 @@ $$
 `tests/test_conservation.py` 覆盖了 `FNEmoles` 的两个守卫分支与 `ratios` 的
 零分母分支。
 
+**浮点精度实测**（模型只用标准库 `math`，不依赖 numpy）：
+
+| 项 | 实测 |
+|---|---|
+| 整模型 float64 vs 60 位十进制重算（Version I 全流程） | 最大相对差 **8.4e-16**（约 4 ulp） |
+| 终态 204Pb、238U | **逐位相同** |
+| 11 / 46 项段求和：`sum()` vs `math.fsum()` vs 逆序求和 | **逐位相同** |
+| `math.exp` vs `np.exp`（模型实际用到的 66 + 276 个指数参数） | **逐位相同** |
+
+即浮点误差比 Table IV 的 0.005 容差低 12 个数量级；模型精度的实际限制是
+论文的印刷位数与参数本身，不是数值格式。换用 numpy 不会改变任何一位
+（`math.exp` 调平台 libm，通常 <1 ulp；numpy 的超越函数不保证正确舍入）。
+
 ## 6. 可复现性
 
 - **零第三方依赖**：两个模型（`version1.py`、`version4.py`）只 `import math`，
@@ -117,6 +130,8 @@ $$
   只用于 `scripts/` 的对比统计（`np.max`/`np.sqrt`/`np.mean`），`matplotlib`
   只用于绘图；
 - **完全确定性**：全流程无随机数、无时间戳、无并行归约顺序不确定；
+  `plotting.py` 显式清空 PDF 元数据里的 `CreationDate`，否则 matplotlib 会写入
+  生成时刻，PDF 图便无法逐位复现；
 - **输入内联**：初始条件与 Table 3 参数以常量/数组写在源码中，并注明出处；
 - **版本可追溯**：`pyproject.toml` 声明 `version = "0.1.0"` 与依赖下界。
 
@@ -126,7 +141,7 @@ $$
 
 | 问题 | 处理 |
 |---|---|
-| 部分版本的 Table 4 把 lower 库 `238U/204Pb` 印成 6.1903（与同行不自洽） | 采用自洽值 **6.4903** 作为校验目标，并在文档中明确说明 |
+| PLUMBO Table 4 的 PDF **文本层**是扫描 OCR，把 `4` 误读成 `1` | 一律以**图像**为准；两个 sub 库目标值仍沿用误读值，见 [`validation.md`](validation.md) §4.8 |
 | Table 3 的印刷富集系数（整数）无法复现 Table 4 | 采用**标定值**（`version4.py` 的 `E_a2`…`F_c3`、`INIT_RATIOS`），印刷值仅作量级参考 |
 | Table IV 两处 orogene `208Pb/204Pb` 为 OCR 错误 | 采用修正值（30.55 / 35.77），并已由修正后的模型独立证实，见 [`validation.md`](validation.md) §4.6 |
 | `history['orogene']` 曾漏掉近端 + 楔形分量 | 已修复，见 [`validation.md`](validation.md) §4.1 |
@@ -170,7 +185,7 @@ Haines & Zartman (1988) 的模型定义、参数与标定。
 ## 10. CI 建议
 
 ```yaml
-# .github/workflows/tests.yml
+# .github/workflows/tests.yml   （建议内容，本仓库尚未创建该文件）
 name: tests
 on: [push, pull_request]
 jobs:
