@@ -1,4 +1,4 @@
-INIT_RATIOS = (9.0668, 9.9367, 28.6528)
+# Initial Pb isotope ratios are defined below the module docstring.
 # -*- coding: utf-8 -*-
 """PLUMBO version IV model (Haines & Zartman, 1988).
 
@@ -8,6 +8,9 @@ Reference:
     U.S. Geological Survey Open-File Report 88-269.
 """
 import math
+
+# Initial 206Pb/204Pb, 207Pb/204Pb, 208Pb/204Pb (calibrated to Table 4).
+INIT_RATIOS = (9.0668, 9.9367, 28.6528)
 
 CYCLES = 46
 
@@ -240,11 +243,14 @@ def run(dp=0.14, double_eroded=False):
                 Sub_mant_h[0] = 0.0
             W_oro_h[0][0] = Sub_re_h[0] + Sub_mant_h[0]
             Total_oro_h[0][0] = D_oro_h[0][0] + P_oro_h[0][0] + W_oro_h[0][0]
-            oro_moles[h] = D_oro_h[0][2] + P_oro_h[0][1] + W_oro_h[0][2]
+            # oro_moles[h] is computed below, after P_oro_h[0][1] and
+            # W_oro_h[0][2] are final (previously this summed zeros).
             W_oro_h[0][1] = W_oro_h[0][0] + Gateb2_h[0]
             Gateb3_h[0] = FNEmoles(W_oro_h[0][1], Gateb3[0], W_oro[0][2], E_b3[h])
             W_oro_h[0][2] = W_oro_h[0][1] - Gateb3_h[0]
             P_oro_h[0][1] = P_oro_h[0][0] + Gateb1_h[0] + Gateb3_h[0]
+            # Total orogene moles = distal + proximal + wedge.
+            oro_moles[h] = D_oro_h[0][2] + P_oro_h[0][1] + W_oro_h[0][2]
             M[h][2][k][1] = FNEmoles(P_oro_h[0][1], U[k], L[k], F_c3[h])
             M[h][2][k][2] = P_oro_h[0][1] - M[h][2][k][1]
             M[h][2][k][3] = W_oro_h[0][2]
