@@ -81,3 +81,50 @@ def test_fnemoles_guards():
     assert FNEmoles(10.0, 1.0, 1.0, 0.0) == 0.0
     assert FNEmoles(10.0, 0.0, 0.0, 1.0) == 0.0
     assert FNEmoles(10.0, 1.0, 0.0, 1.0) > 0.0
+
+
+def test_fnemoles_is_elementwise():
+    """The numpy rewrite must accept a whole isotope axis at once."""
+    import numpy as np
+
+    N = np.array([10.0, 20.0, 30.0])
+    bias = np.array([1.0, 0.0, 2.0])          # the middle one hits the guard
+    got = FNEmoles(N, 1.0, 1.0, bias)
+    assert got.shape == (3,)
+    assert got[0] == FNEmoles(10.0, 1.0, 1.0, 1.0)
+    assert got[1] == 0.0
+    assert got[2] == FNEmoles(30.0, 1.0, 1.0, 2.0)
+
+
+def test_models_compute_with_numpy():
+    """Both cores carry their state in ndarrays and no longer use `math`."""
+    import ast
+    import pathlib
+
+    src = pathlib.Path(__file__).resolve().parents[1] / "src" / "plumbotectonics"
+    for name in ("version1.py", "version4.py"):
+        tree = ast.parse((src / name).read_text(encoding="utf-8"))
+        imported = set()
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Import):
+                imported |= {a.name.split(".")[0] for a in node.names}
+            elif isinstance(node, ast.ImportFrom) and node.module:
+                imported.add(node.module.split(".")[0])
+        assert imported == {"numpy"}, (name, imported)
+
+
+def test_version1_returns_the_documented_dicts():
+    """The numpy migration must not leak arrays into the public API."""
+    import numpy as np
+
+    hist, mantle, upper_segs, lower_segs = run_v1()
+    for reservoir in [mantle] + upper_segs + lower_segs:
+        assert type(reservoir) is dict
+        for key in ("mass", "204", "206", "207", "208", "232", "238"):
+            assert type(reservoir[key]) is float, (key, type(reservoir[key]))
+    for entry in hist:
+        assert type(entry["t"]) is float
+        for name in ("mantle", "orogene", "upper", "lower"):
+            if entry[name] is not None:
+                assert type(entry[name]) is dict
+    assert not any(isinstance(v, np.ndarray) for v in mantle.values())
