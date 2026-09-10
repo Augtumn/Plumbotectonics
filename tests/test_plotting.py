@@ -58,3 +58,30 @@ def test_version4_figure_layout():
     fig = plot_version4_growth_curves(result, out)
     _assert_layout(fig, "version4")
     assert os.path.getsize(out) > 0
+
+
+def test_pdf_has_no_creation_timestamp():
+    """The PDFs must stay byte-reproducible (docs/correctness.md section 6).
+
+    matplotlib stamps ``/CreationDate`` with the wall-clock time unless it is
+    explicitly cleared, which made the committed PDF figures differ on every
+    regeneration.  The earlier layout tests only ever wrote a PNG, so nothing
+    covered the PDF path.
+    """
+    directory = tempfile.mkdtemp()
+    png = os.path.join(directory, "v1.png")
+    pdf = os.path.join(directory, "v1.pdf")
+
+    history, _, _, _ = run_v1()
+    plot_version1_growth_curves(history, png, pdf)
+
+    with open(pdf, "rb") as handle:
+        raw = handle.read()
+    assert raw.startswith(b"%PDF-"), "not a PDF"
+    assert b"/CreationDate" not in raw, "PDF embeds a wall-clock timestamp"
+    assert b"/ModDate" not in raw, "PDF embeds a modification timestamp"
+
+    result = run_v4(dp=0.14)
+    plot_version4_growth_curves(result, png, pdf)
+    with open(pdf, "rb") as handle:
+        assert b"/CreationDate" not in handle.read()

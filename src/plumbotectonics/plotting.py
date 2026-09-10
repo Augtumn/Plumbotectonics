@@ -117,7 +117,9 @@ def plot_version4_growth_curves(result: dict[str, Any], out_png: str, out_pdf: s
     fig.savefig(out_png, dpi=600, bbox_inches="tight")
     if out_pdf:
         os.makedirs(os.path.dirname(os.path.abspath(out_pdf)), exist_ok=True)
-        fig.savefig(out_pdf, bbox_inches="tight")
+        # no CreationDate: otherwise the PDF embeds a wall-clock timestamp and
+        # is not byte-reproducible, contradicting the determinism guarantee
+        fig.savefig(out_pdf, bbox_inches="tight", metadata={"CreationDate": None})
     plt.close(fig)
     return fig
 
@@ -184,6 +186,8 @@ def plot_version1_growth_curves(history: list[dict[str, Any]], out_png: str, out
     fig.savefig(out_png, dpi=600, bbox_inches="tight")
     if out_pdf:
         os.makedirs(os.path.dirname(os.path.abspath(out_pdf)), exist_ok=True)
-        fig.savefig(out_pdf, bbox_inches="tight")
+        # no CreationDate: otherwise the PDF embeds a wall-clock timestamp and
+        # is not byte-reproducible, contradicting the determinism guarantee
+        fig.savefig(out_pdf, bbox_inches="tight", metadata={"CreationDate": None})
     plt.close(fig)
     return fig
