@@ -1,5 +1,7 @@
 # API 参考
 
+> [English](en/api.md) | **简体中文**
+
 ## 包 `plumbotectonics`
 
 `src/plumbotectonics/__init__.py` 暴露：

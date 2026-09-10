@@ -1,5 +1,7 @@
 # Plumbotectonics
 
+[English](README.en.md) | **简体中文**
+
 Zartman & Doe (1981) 与 Haines & Zartman (1988) 铅同位素演化模型的
 Python 实现与校验。
 
@@ -52,13 +54,13 @@ uv run python scripts/plot_growth_curves.py  # 生长曲线图 -> outputs/figure
 
 ## 文档
 
-| 文档 | 内容 |
-|---|---|
-| [`docs/theory.md`](docs/theory.md) | 计算原理：两版本的质量/同位素传输、分配函数与衰变 |
-| [`docs/usage.md`](docs/usage.md) | 安装、命令行、Python API 与故障排查 |
-| [`docs/api.md`](docs/api.md) | 模块、函数、参数与返回数据结构 |
-| [`docs/validation.md`](docs/validation.md) | Table 4 校验数据、标定说明与已知问题 |
-| [`docs/correctness.md`](docs/correctness.md) | 结果正确性保证：三层保证体系、守恒不变量、CI |
+| 中文 | English | 内容 |
+|---|---|---|
+| [`docs/theory.md`](docs/theory.md) | [`docs/en/theory.md`](docs/en/theory.md) | 计算原理：两版本的质量/同位素传输、分配函数与衰变 |
+| [`docs/usage.md`](docs/usage.md) | [`docs/en/usage.md`](docs/en/usage.md) | 安装、命令行、Python API 与故障排查 |
+| [`docs/api.md`](docs/api.md) | [`docs/en/api.md`](docs/en/api.md) | 模块、函数、参数与返回数据结构 |
+| [`docs/validation.md`](docs/validation.md) | [`docs/en/validation.md`](docs/en/validation.md) | Table 4 校验数据、标定说明与已知问题 |
+| [`docs/correctness.md`](docs/correctness.md) | [`docs/en/correctness.md`](docs/en/correctness.md) | 结果正确性保证：三层保证体系、守恒不变量、CI |
 
 ## 目录结构
 
@@ -68,7 +70,7 @@ uv run python scripts/plot_growth_curves.py  # 生长曲线图 -> outputs/figure
 - `tests/` — pytest 校验套件
 - `papers/` — 原始论文
 - `outputs/` — 生成的表格与图形
-- `docs/` — 文档
+- `docs/` — 中文文档，`docs/en/` — English documentation
 
 ## 测试
 

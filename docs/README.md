@@ -1,12 +1,14 @@
 # 文档索引
 
-| 文档 | 内容 |
-|---|---|
-| [theory.md](theory.md) | 计算原理：总体框架、Version I、Version IV、两版本对照 |
-| [usage.md](usage.md) | 环境要求、安装、命令行、Python API、故障排查 |
-| [api.md](api.md) | 模块、函数、参数与返回数据结构 |
-| [validation.md](validation.md) | Table 4 校验数据、标定说明、已知问题 |
-| [correctness.md](correctness.md) | 结果正确性保证：三层保证体系、守恒不变量、CI |
+> [English](en/README.md) | **简体中文**
+
+| 中文 | English | 内容 |
+|---|---|---|
+| [theory.md](theory.md) | [en/theory.md](en/theory.md) | 计算原理：总体框架、Version I、Version IV、两版本对照 |
+| [usage.md](usage.md) | [en/usage.md](en/usage.md) | 环境要求、安装、命令行、Python API、故障排查 |
+| [api.md](api.md) | [en/api.md](en/api.md) | 模块、函数、参数与返回数据结构 |
+| [validation.md](validation.md) | [en/validation.md](en/validation.md) | Table 4 校验数据、标定说明、已知问题 |
+| [correctness.md](correctness.md) | [en/correctness.md](en/correctness.md) | 结果正确性保证：三层保证体系、守恒不变量、CI |
 
 ## 快速导航
 

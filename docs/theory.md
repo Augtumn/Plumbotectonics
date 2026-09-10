@@ -1,5 +1,7 @@
 # 计算原理
 
+> [English](en/theory.md) | **简体中文**
+
 本文档说明本仓库中两个模型（Version I 与 Version IV / PLUMBO）的计算流程，
 与 `src/plumbotectonics/version1.py`、`version4.py` 的实现逐行对应。
 

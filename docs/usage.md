@@ -1,5 +1,7 @@
 # 使用指南
 
+> [English](en/usage.md) | **简体中文**
+
 ## 1. 环境要求
 
 - Python >= 3.10

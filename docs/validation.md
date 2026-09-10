@@ -1,5 +1,7 @@
 # 校验与已知问题
 
+> [English](en/validation.md) | **简体中文**
+
 > 本文档给出**校验数据**；保证体系的完整说明见
 > [`correctness.md`](correctness.md)（结果正确性保证）。
 
