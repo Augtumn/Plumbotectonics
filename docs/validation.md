@@ -14,7 +14,7 @@
 运行：
 
 ```bash
-python scripts/run_version4.py
+uv run python scripts/run_version4.py
 ```
 
 目标值为 Haines & Zartman (1988) Table 4 的最终值；模型取 `dp=0.14`、

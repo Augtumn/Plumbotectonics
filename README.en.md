@@ -39,8 +39,8 @@ returning increment. Version IV adds the mid-ocean-ridge (MOR)
 reservoir, the subcrustal lithosphere, a three-component orogene
 (distal / proximal / wedge) and explicit mass-exchange gates.
 
-The physical picture behind the bi-directional transport comes from
-Zartman & Haines (1988).
+The physical picture behind the bi-directional transport between the orogene
+and the subcrustal lithosphere comes from Zartman & Haines (1988).
 
 ## Install
 
@@ -55,7 +55,7 @@ uv sync --extra dev  # add the dev dependencies (pytest)
 Runtime dependencies are `numpy`, `pandas` and `matplotlib`. **The models
 themselves have no third-party dependencies** (`version1.py` and `version4.py`
 import only `math`): numpy/pandas serve the comparison statistics in `scripts/`
-and matplotlib only the plotting.
+and matplotlib only the plotting. See [`docs/en/usage.md`](docs/en/usage.md).
 
 ## Run
 
@@ -162,4 +162,10 @@ Results are pinned by three independent layers; see
 Reference 3 gives the physical basis for the bi-directional transport
 implemented by this project's gates.
 
-`papers/` contains the PDFs of references 1 and 2; reference 3 is not bundled.
+`papers/` bundles the PDFs of all three references:
+
+| Reference | Local file |
+|---|---|
+| 1 Haines & Zartman (1988) | `papers/Haines_Zartman_1988_PLUMBO.pdf` |
+| 2 Zartman & Doe (1981) | `papers/Zartman_Doe_1981_Plumbotectonics.pdf` |
+| 3 Zartman & Haines (1988) | `papers/Zartman_Haines_1988_Bidirectional.pdf` |
