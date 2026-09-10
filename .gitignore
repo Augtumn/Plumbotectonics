@@ -6,7 +6,4 @@ __pycache__/
 venv/
 build/
 dist/
-outputs/figures/*.png
-outputs/figures/*.pdf
-outputs/results/*.csv
 .DS_Store
