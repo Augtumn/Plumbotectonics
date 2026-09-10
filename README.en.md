@@ -19,6 +19,8 @@ occurs.
   **Version IV** (Haines & Zartman, 1988);
 - Reproduces all 24 present-day values of Haines & Zartman (1988), Table 4
   (worst absolute deviation **0.00993**, test tolerance 0.02);
+- Reproduces all 126 growth-curve values of Zartman & Doe (1981), Table IV
+  (worst absolute deviation **0.00509**, the two-decimal printing limit);
 - Publication-style growth curves for both models (600 dpi PNG + vector PDF).
 
 ## Models
@@ -28,8 +30,10 @@ occurs.
 | `plumbotectonics.version1` | Version I | Zartman & Doe (1981) |
 | `plumbotectonics.version4` | Version IV | Haines & Zartman (1988) |
 
-Version I is a two-reservoir (mantle + crust) mass balance with fixed
-partition coefficients. Version IV adds the mid-ocean-ridge (MOR)
+Version I is a two-reservoir (mantle + crust) mass balance in which orogene
+material is split between the returning mantle and the new upper/lower crust
+by fixed partition ratios (`F_PB`/`F_U`/`F_TH`) weighted by the mass of each
+returning increment. Version IV adds the mid-ocean-ridge (MOR)
 reservoir, the subcrustal lithosphere, a three-component orogene
 (distal / proximal / wedge) and explicit mass-exchange gates.
 
@@ -86,10 +90,12 @@ Full documentation is available in both languages:
 uv run pytest
 ```
 
-Coverage: the initial and present-day mantle ratios of Version I, the 24
-Table 4 ratios of the four Version IV reservoirs (`abs(diff) < 0.02`), and the
-mass-conservation and structural invariants of both models
-(`tests/test_conservation.py`) plus the figure layout (`tests/test_plotting.py`). Current status: **14/14 passing**.
+Coverage: all 126 Table IV rows of Version I (11 cycles x 4 reservoirs x 3
+ratios, tolerance 0.006) and the 12 element abundances of Table II section
+III.B, the 24 Table 4 ratios of the four Version IV reservoirs
+(`abs(diff) < 0.02`), and the mass-conservation and structural invariants of
+both models (`tests/test_conservation.py`) plus the figure layout
+(`tests/test_plotting.py`). Current status: **18/18 passing**.
 
 ## Validation
 
@@ -109,14 +115,21 @@ Worst deviation from Table 4 at `dp=0.14` over 46 cycles:
 
 See [`docs/en/validation.md`](docs/en/validation.md) for the full table.
 
+Version I is validated against the growth curves of Zartman & Doe (1981),
+Table IV: the worst deviation over all 126 rows (11 cycles x 4 reservoirs x 3
+ratios) is **0.00509**, which is the two-decimal printing limit of that table,
+and all 12 element abundances of Table II section III.B land within 1 %.
+
 ## Correctness guarantees
 
 Results are pinned by three independent layers; see
 [`docs/en/correctness.md`](docs/en/correctness.md):
 
 1. **Baseline validation** - Version IV reproduces all 24 present-day values
-   of Haines & Zartman (1988), Table 4 (`abs(diff) < 0.02`); Version I matches
-   the initial and present-day mantle ratios of Zartman & Doe (1981).
+   of Haines & Zartman (1988), Table 4 (`abs(diff) < 0.02`); Version I
+   reproduces all 126 values of Zartman & Doe (1981), Table IV (worst 0.00509,
+   the printing precision) and the 12 element abundances of Table II section
+   III.B (within 1 %).
 2. **Invariants** - total mass is conserved exactly in both models
    (Version I: 800; Version IV: 1050), pinned by
    `tests/test_conservation.py` together with structural checks.

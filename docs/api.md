@@ -32,6 +32,10 @@
 
 运行 Version I 的 11 个旋回。
 
+每个旋回按论文的 eq. 14–16 抽取、eq. 17–19 再分配（分配比 `F_PB`/`F_U`/`F_TH`
+按返回增量质量加权，见 [`theory.md`](theory.md) §2.5）、eq. 20–22 衰变。
+`history` 记录的是**每次造山之前**的状态，与 Table IV 的时刻约定一致。
+
 **返回**：`(history, mantle, upper_segs, lower_segs)`
 
 - `history`：`list[dict]`，每个旋回一项：

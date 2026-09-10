@@ -13,7 +13,7 @@
 | ② 不变量校验 | 守恒量与结构约束 | `tests/test_conservation.py` |
 | ③ 回归测试 | 每次改动重跑 ①+② | `pytest`（含 `tests/test_plotting.py` 图形布局检查） |
 
-三层全部通过，才认为结果"在模型定义下正确"。当前实测：**14/14 通过**。
+三层全部通过，才认为结果"在模型定义下正确"。当前实测：**18/18 通过**。
 
 ## 2. ① 基准校验
 
@@ -28,8 +28,18 @@ Table 4 给出 4 个储库 × 6 个比值的现今值，共 24 项。模型以 `
 ### 2.2 Version I → Zartman & Doe (1981)
 
 - 初始地幔：206/204 = 10.36、207/204 = 12.12、208/204 = 30.55（精确匹配）；
-- 现今地幔：**18.2525 / 15.4801 / 38.0631**，对应 Table IV 的
-  18.25 / 15.48 / 38.06（容差 0.5 / 0.3 / 0.5）。
+- 全表复现：11 个旋回 × 4 个储库 × 3 个比值共 **126 项**逐项对比 Table IV，
+  最大偏差 **0.00509**（t = 1.6 Ga 地幔 `207/204`），即该表两位小数的印刷极限；
+  最大相对误差 0.0349 %，RMSE 0.002729；
+- 现今地幔：18.0782 / 15.4156 / 37.6804，对应 Table IV 的 18.08 / 15.42 / 37.68；
+- 元素丰度：Table II 第三节 B 的 12 项（质量与 204Pb/238U/232Th）全部落在
+  1 % 以内。
+
+完整对照表见 [`validation.md`](validation.md) §2。
+
+> 2026-09 之前该项校验只做到"现今地幔 1 % 量级"，根因是造山带再分配
+> （论文 eq. 17–19）把分配比误用为直接分数；修复记录见
+> [`validation.md`](validation.md) §2.1。
 
 ## 3. ② 不变量校验
 
@@ -115,7 +125,9 @@ $$
 |---|---|
 | 部分版本的 Table 4 把 lower 库 `238U/204Pb` 印成 6.1903（与同行不自洽） | 采用自洽值 **6.4903** 作为校验目标，并在文档中明确说明 |
 | Table 3 的印刷富集系数（整数）无法复现 Table 4 | 采用**标定值**（`version4.py` 的 `E_a2`…`F_c3`、`INIT_RATIOS`），印刷值仅作量级参考 |
-| `history['orogene']` 曾漏掉近端 + 楔形分量 | 已修复，见 [`validation.md`](validation.md) §3.1 |
+| Table IV 两处 orogene `208Pb/204Pb` 为 OCR 错误 | 采用修正值（30.55 / 35.77），并已由修正后的模型独立证实，见 [`validation.md`](validation.md) §4.6 |
+| `history['orogene']` 曾漏掉近端 + 楔形分量 | 已修复，见 [`validation.md`](validation.md) §4.1 |
+| 曾把 Version I 的 1.5 % 偏差归因于"论文不自洽" | 结论错误，已撤回；真因是 eq. 17–19 的实现方式，已修复，见 [`validation.md`](validation.md) §2.1 |
 
 这些不一致都在文档中显式记录，而不是靠"调参凑数"掩盖。
 
@@ -139,9 +151,9 @@ for name in dir(t):
         print("ok", name)
 ```
 
-`scripts/run_version1.py` 与 `scripts/run_version4.py` 分别把结果写入
-`outputs/results/version1_history.csv`（11 个旋回的递推结果）与
-`outputs/results/version4_comparison.csv`（24 项 Table 4 对比），便于人工复核。
+`scripts/run_version1.py` 把 126 项 Table IV 对比写入
+`outputs/results/version1_comparison.csv`，`scripts/run_version4.py` 把 24 项
+Table 4 对比写入 `outputs/results/version4_comparison.csv`，便于人工复核。
 
 ## 9. 局限与适用范围
 

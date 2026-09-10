@@ -117,28 +117,57 @@ $$
 M_u^{\mathrm{new}} = M_l^{\mathrm{new}} = 2.6\times10^{24}\ \mathrm{g},
 $$
 
-and the rest returns to the mantle. Pb, U and Th are partitioned between
-(returned mantle, new upper crust, new lower crust) as
+and the rest returns to the mantle, with mass
 
-| Element | Mantle | Upper crust | Lower crust |
+$$
+M_{\mathrm{ret}} = M_{or} - 2.6 - 2.6 .
+$$
+
+Pb, U and Th are partitioned between the three **returning increments**
+(returned mantle / new upper crust / new lower crust) as
+
+| Element | $F^m$ (mantle) | $F^u$ (upper) | $F^l$ (lower) |
 |---|---|---|---|
 | Pb | 0.028 | 0.754 | 0.218 |
 | U | 0.024 | 0.854 | 0.122 |
 | Th | 0.020 | 0.788 | 0.192 |
 
-(`F_PB`, `F_U`, `F_TH`; each row sums to 1). Hence
+(`F_PB`, `F_U`, `F_TH`). These are **concentration ratios, not shares**: each
+returning increment receives a part of the orogene content proportional to
+*its own mass times its partitioning ratio*, divided by the normalising factor
+$s$. This is eqs. 17-19 of the paper:
 
 $$
-X_m \leftarrow X_m - \Delta X_m + f^{\mathrm{Pb/U/Th}}_{\mathrm{mantle}} X_{or},
+s = M_{\mathrm{ret}}F^m + M_u^{\mathrm{new}}F^u + M_l^{\mathrm{new}}F^l,
 $$
 
-and the new upper/lower segments take $f_{\mathrm{upper}}X_{or}$ and
-$f_{\mathrm{lower}}X_{or}$.
+$$
+X_m^{\mathrm{ret}} = X_{or}\frac{M_{\mathrm{ret}}F^m}{s},\qquad
+X_u^{\mathrm{new}} = X_{or}\frac{M_u^{\mathrm{new}}F^u}{s},\qquad
+X_l^{\mathrm{new}} = X_{or}\frac{M_l^{\mathrm{new}}F^l}{s}.
+$$
 
-The mantle mass becomes
+The three add up to exactly $X_{or}$, so the redistribution itself neither
+creates nor loses any element.
+
+> **Why the ratios cannot be used as shares.** The mass returning to the mantle
+> (94.8 in the first cycle) exceeds each new crustal increment (2.6) by one to
+> two orders of magnitude, so the mantle actually receives
+> $94.8\times0.028/s = 51.3\ \%$ of the orogene lead in that cycle, not
+> $2.8\ \%$. Treating `F_PB[0]` as a fraction of the orogene content strips the
+> mantle and over-feeds the crust -- the source of this repository's earlier
+> 1.5 % deviation; see [`validation.md`](validation.md) section 2.1.
+
+The mantle inventory of each element becomes
 
 $$
-M_m \leftarrow M_m - \Delta M_m + (M_{or} - 2.6 - 2.6),
+X_m \leftarrow X_m - \Delta X_m + X_m^{\mathrm{ret}},
+$$
+
+and the mantle mass
+
+$$
+M_m \leftarrow M_m - \Delta M_m + M_{\mathrm{ret}},
 $$
 
 while older upper and lower segments shrink by factors 0.63 and 0.90.
@@ -430,9 +459,9 @@ where $T=T_k$ and $\Delta T=0.1$ Ga.
 |---|---|---|
 | Reservoirs | mantle, upper/lower crust | + subcrustal, MOR, three orogene components |
 | Cycles | 11 x 0.4 Ga | 46 x 0.1 Ga |
-| Partitioning | fixed fractions `F_PB`/`F_U`/`F_TH` | `FNEmoles` + enrichment arrays |
+| Partitioning | `F_PB`/`F_U`/`F_TH` weighted by returning-increment mass (eqs. 17-19) | `FNEmoles` + enrichment arrays |
 | Time parameters | none | Table 3 `A1`/`A4`/`A6`/`U`/`L`/`S` |
-| Validation target | Table IV order of magnitude | Table 4 exact values (< 0.02) |
+| Validation target | all 126 Table IV values + Table II section III, to print precision | Table 4 exact values (< 0.02) |
 
 ## 5. References
 

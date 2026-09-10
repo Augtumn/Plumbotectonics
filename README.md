@@ -16,6 +16,8 @@ Plumbotectonics 是一类质量平衡模型：把地球浅部划分为若干长�
   **Version IV**（Haines & Zartman, 1988）两个模型；
 - 复现 Haines & Zartman (1988) Table 4 的全部 24 个现今值
   （最差绝对偏差 **0.00993**，测试容差 0.02）；
+- 复现 Zartman & Doe (1981) Table IV 的全部 126 个生长曲线值
+  （最差绝对偏差 **0.00509**，即该表两位小数的印刷极限）；
 - 内置两版本的生长曲线绘图（600 dpi PNG + 矢量 PDF）。
 
 ## 模型
@@ -25,7 +27,9 @@ Plumbotectonics 是一类质量平衡模型：把地球浅部划分为若干长�
 | `plumbotectonics.version1` | Version I | Zartman & Doe (1981) |
 | `plumbotectonics.version4` | Version IV | Haines & Zartman (1988) |
 
-Version I 是"地幔 + 地壳"的两储库质量平衡，使用固定的分配系数；
+Version I 是"地幔 + 地壳"的两储库质量平衡：造山带物质按固定分配比
+（`F_PB`/`F_U`/`F_TH`）在返回地幔与新上/下地壳之间分配，且分配比按各返回
+增量自身的质量加权；
 Version IV 增加了洋中脊（MOR）储库、次地壳岩石圈、造山带的三组分
 结构（远端 / 近端 / 楔形）以及显式的物质交换"门"（gates）。
 
@@ -78,9 +82,11 @@ uv run python scripts/plot_growth_curves.py  # 生长曲线图 -> outputs/figure
 uv run pytest
 ```
 
-覆盖范围：Version I 的初始与现今地幔比值、Version IV 四个储库对 Table 4 的
-24 项比对（`abs(diff) < 0.02`）、两个模型的质量守恒与结构不变量
-（`tests/test_conservation.py`）以及图形布局（标题不得与面板标题重叠，`tests/test_plotting.py`）。当前状态：**14/14 通过**。
+覆盖范围：Version I 对 Table IV 全部 126 项（11 个旋回 × 4 个储库 × 3 个比值，
+容差 0.006）与 Table II 第三节 B 的 12 项元素丰度、Version IV 四个储库对
+Table 4 的 24 项比对（`abs(diff) < 0.02`）、两个模型的质量守恒与结构不变量
+（`tests/test_conservation.py`）以及图形布局（标题不得与面板标题重叠，
+`tests/test_plotting.py`）。当前状态：**18/18 通过**。
 
 ## 校验
 
@@ -99,14 +105,19 @@ Version IV 以 Haines & Zartman (1988) Table 4 的现今值为标定目标。low
 
 完整对照表见 [`docs/validation.md`](docs/validation.md)。
 
+Version I 以 Zartman & Doe (1981) Table IV 的生长曲线为校验目标，11 个旋回 ×
+4 个储库 × 3 个比值共 126 项的最差偏差为 **0.00509**（Table IV 只印两位小数，
+0.005 即其精度极限）；Table II 第三节 B 的 12 项元素丰度全部在 1 % 以内。
+
 ## 正确性保证
 
 结果由三层相互独立的机制固定，详见
 [`docs/correctness.md`](docs/correctness.md)：
 
 1. **基准校验** — Version IV 复现 Haines & Zartman (1988) Table 4 全部 24 个
-   现今值（`abs(diff) < 0.02`）；Version I 与 Zartman & Doe (1981) 的初始及
-   现今地幔比值一致。
+   现今值（`abs(diff) < 0.02`）；Version I 复现 Zartman & Doe (1981) Table IV
+   全部 126 个值（最差 0.00509，即印刷精度）与 Table II 第三节 B 的
+   12 项元素丰度（1 % 以内）。
 2. **不变量** — 两个模型的总质量精确守恒（Version I：800；
    Version IV：1050），由 `tests/test_conservation.py` 连同结构约束一并校验。
 3. **回归测试** — 每次改动由 `pytest` 重跑上述两层。

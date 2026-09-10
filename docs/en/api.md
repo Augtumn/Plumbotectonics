@@ -33,6 +33,12 @@
 
 Runs the 11 cycles of Version I.
 
+Each cycle extracts per eqs. 14-16, redistributes per eqs. 17-19 (the
+`F_PB`/`F_U`/`F_TH` partition ratios are weighted by returning-increment mass,
+see [`theory.md`](theory.md) section 2.5) and decays per eqs. 20-22.
+`history` records the state **before** each orogeny, matching the instant used
+by Table IV.
+
 **Returns**: `(history, mantle, upper_segs, lower_segs)`
 
 - `history`: `list[dict]`, one entry per cycle:

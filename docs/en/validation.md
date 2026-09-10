@@ -7,6 +7,10 @@
 
 ## 1. Version IV: Table 4 validation
 
+> The original source of the target values is reproduced in
+> [`outputs/results/literature/`](../../outputs/results/literature/) (PLUMBO
+> Table 4, pages 1-2); transcription caveats in section 4.8.
+
 Run:
 
 ```bash
@@ -65,67 +69,97 @@ as an order-of-magnitude reference.
 
 ## 2. Version I: comparison with Table IV of Zartman & Doe (1981)
 
+> The original source of the target values is reproduced in
+> [`outputs/results/literature/`](../../outputs/results/literature/)
+> (Table II, Table IV and eqs. 17-19).
+
 `scripts/run_version1.py` compares 11 cycles x 4 reservoirs x 3 ratios (126
 rows) against Table IV and writes
 `outputs/results/version1_comparison.csv`:
 
 | Metric | Value |
 |---|---|
-| max absolute difference | 0.590072 (lower `208/204`, t = 0) |
-| max percentage error | **1.5303 %** (lower `208/204`, t = 0) |
-| RMSE | 0.196491 |
+| max absolute difference | 0.005089 (mantle `207/204`, t = 1.6) |
+| max percentage error | **0.0349 %** (mantle `207/204`, t = 3.6) |
+| RMSE | 0.002729 |
+
+Table IV is printed to two decimals, so 0.005 is that table's precision limit.
+The only one of the 126 rows past it is mantle `207/204` at t = 1.6 Ga (model
+15.1551 against a printed 15.15, difference 0.00509) -- a rounding-boundary
+case.
 
 Present day (t = 0), model / Table IV:
 
 | Reservoir | 206/204 | 207/204 | 208/204 |
 |---|---|---|---|
-| mantle | 18.2525 / 18.08 | 15.4801 / 15.42 | 38.0631 / 37.68 |
-| orogene | 18.8099 / 18.88 | 15.5998 / 15.63 | 38.4603 / 38.82 |
-| upper crust | 19.2296 / 19.33 | 15.6945 / 15.73 | 38.5937 / 39.06 |
-| lower crust | 17.0545 / 17.29 | 15.2018 / 15.30 | 37.9699 / 38.56 |
+| mantle | 18.0782 / 18.08 | 15.4156 / 15.42 | 37.6804 / 37.68 |
+| orogene | 18.8783 / 18.88 | 15.6261 / 15.63 | 38.8248 / 38.82 |
+| upper crust | 19.3335 / 19.33 | 15.7273 / 15.73 | 39.0648 / 39.06 |
+| lower crust | 17.2911 / 17.29 | 15.2991 / 15.30 | 38.5580 / 38.56 |
 
-**Conclusion**: Version I reproduces Table IV to about **1 %** (worst 1.53 %),
-roughly 50x worse than the 0.028 % of Version IV; `208Pb/204Pb` deviates most
-(lower crust -1.53 %, mantle +1.02 %).
+**Conclusion**: Version I reproduces all 126 Table IV values to the precision
+printed in the paper (worst 0.00509, 0.035 % relative) -- the same order as
+Version IV's 0.028 % against Table 4.
 
-### 2.1 Where the deviation comes from: masses and parameters match, element partitioning does not
+### 2.1 The former 1.5 % deviation: root cause and fix
 
-Comparing the model's present-day inventories with Table II section III
-(element abundances):
+Before the fix, Version I differed from Table IV by up to **0.5901 (1.5303 %)**
+with RMSE 0.1965, and this document attributed that to "the paper's parameter
+text being inconsistent with its own result tables". **That conclusion was
+wrong**: the paper is self-consistent and the deviation came from this
+repository.
 
-| Quantity | mantle model / paper | upper model / paper | lower model / paper | total |
-|---|---|---|---|---|
-| mass ($10^{24}$ g) | 775.176 / 775.2 | 6.983 / 7.0 | 17.841 / 17.8 | 800 / 800 ok |
-| 204Pb ($10^{15}$ mol) | **11.46 / 19.5** | **14.44 / 10.3** | **12.10 / 8.2** | 38 / 38 ok |
-| 238U | **104.40 / 174** | **174.71 / 127** | **69.88 / 48** | 349 / 349 ok |
-| 232Th | **383.61 / 619** | **560.77 / 430** | **390.62 / 286** | 1335 / 1335 ok |
+The root cause was the **orogene redistribution**
+([`theory.md`](theory.md) section 2.5, eqs. 17-19 of the paper):
 
-**The mass bookkeeping is exact**: the 0.63 / 0.90 shrink factors reproduce Table
-III (2.600 -> 4.238 -> 5.270 ... -> 6.983 and 2.600 -> 4.940 -> 7.046 ... ->
-17.841).
+| Approach | Mantle share of orogene Pb, first cycle |
+|---|---|
+| Before: `F_PB` used directly as fractions of the orogene content | 2.8 % |
+| Paper eqs. 17-19: weighted by returning-increment mass, over $s=\sum M_iF_i$ | $94.8\times0.028/5.1816$ = **51.3 %** |
 
-**But the mantle keeps only 0.59-0.62 of the paper's amount while the crust gets
-30-48 % more**: the model strips too much out of the mantle and feeds too much
-into the crust. The 1.53 % Pb-isotope deviation is a downstream consequence.
+In the first cycle the mantle contributes 100 mass units and takes back 94.8,
+while each new crustal increment receives only 2.6 -- so the mantle must get
+the bulk of the orogene. Splitting by 2.8 % instead strips the mantle and
+over-feeds the crust:
 
-Every printed parameter checked so far matches the implementation: the $f_m$
-sequence (1/8, 1/16, 1/32, 1/64, then 1/128), 3/10 upper-crust erosion plus 1/10
-total-crust areal erosion (combining to 0.37), 2.6e24 g of new upper and lower
-crust per cycle, $E_m=4$, $E_u=E_l=1$, the Pb/U/Th partition ratios, the decay
-equations and the convention that parents are not depleted.
+| Quantity ($10^{15}$ mol) | before: model / Table II | after: model / Table II |
+|---|---|---|
+| mantle 204Pb | **11.46** / 19.5 | **19.48** / 19.5 |
+| upper 204Pb | **14.44** / 10.3 | **10.35** / 10.3 |
+| lower 204Pb | **12.10** / 8.2 | **8.17** / 8.2 |
+| mantle 238U | **104.4** / 174 | **173.5** / 174 |
+| upper 238U | **174.7** / 127 | **127.1** / 127 |
+| lower 238U | **69.9** / 48 | **48.5** / 48 |
+| mantle 232Th | **383.6** / 619 | **619.2** / 619 |
+| upper 232Th | **560.8** / 430 | **429.6** / 430 |
+| lower 232Th | **390.6** / 286 | **286.3** / 286 |
 
-The deviation therefore sits in the **mantle-to-orogene element extraction**,
-i.e. eq. 14:
+All 12 entries of Table II section III.B now land within 1 % (worst 0.94 %,
+lower-crust 238U: 48.45 / 48).
 
-> $\Delta^{\alpha}N_{m} = (\Delta M_m / M_{?}) \cdot {}^{\alpha}N_m \cdot {}^{\alpha}E_m$
+> **The two tables use different instants.** The absolute abundances of
+> Table II section III.B are the state **after** the final orogeny (masses
+> 775.18 / 6.98 / 17.84 against 775.2 / 7.0 / 17.8), while Table IV and
+> section III.A give the state **before** it (18.078 / 19.333 / 17.291 against
+> 18.08 / 19.33 / 17.29). `history` records the latter; the segment
+> reservoirs returned by `run()` are the former.
 
-The fraction is **unreadable in the scan** (OCR gives `(~~/~~)`), and the prose is
-itself contradictory - "the mantle contributes 1/8 of itself" versus
-"$E_m=4$ simulates complete extraction into a 25 % melt". Numerically, the two
-readings give 11.5 (the $f_m \cdot E_m$ reading used here) and 28.1 (the $f_m$
-reading) for the final mantle 204Pb, **neither matching the 19.5 of Table II**.
-That is an inconsistency between the paper's parameter text and its result
-tables, not something the implementation can fix on its own.
+### 2.2 Parameter check
+
+Every printed parameter was checked against the implementation and all of them
+match -- and they are **sufficient to reproduce both tables**: the $f_m$
+sequence (1/8, 1/16, 1/32, 1/64, then 1/128), 3/10 upper-crust erosion plus
+1/10 total-crust areal erosion (combining to 0.37), $2.6\times10^{24}$ g of new
+upper and lower crust per cycle, $E_m=4$, $E_u=E_l=1$, the Pb/U/Th partition
+ratios (0.028, 0.754, 0.218) / (0.024, 0.854, 0.122) / (0.020, 0.788, 0.192),
+the decay equations, and the convention that parents are not depleted.
+
+There is therefore **no "paper inconsistency" to work around**: the Table II
+parameters plus eqs. 17-19 reproduce Table IV and Table II section III
+simultaneously. The supposedly unreadable fraction in eq. 14 (OCR gives
+`(~~/~~)`) is no longer a gap either -- the prose reading "mass ratio of magma
+to total mantle" together with $E_m=4$ gives the right answer once eqs. 17-19
+are used.
 
 ## 3. Conservation and invariants
 
@@ -185,8 +219,13 @@ it for future fitting work or drop it.
 The test used to compare against 18.25 / 15.48 / 38.06 and label them as Table
 IV, but Table IV actually gives **18.08 / 15.42 / 37.68**; 18.25 / 15.48 /
 38.06 is this implementation's own output. The tolerances (0.5 / 0.3 / 0.5)
-accept both, which is why the mistake never failed the suite. The assertions now
-use the real Table IV values and the comment is corrected.
+accept both, which is why the mistake never failed the suite.
+
+**Current state**: the assertions use the real Table IV values and now cover all
+**126 rows** (11 cycles x 4 reservoirs x 3 ratios) with the tolerance tightened
+to `0.006`; the 12 Table II section III.B abundances and a regression assertion
+that the partition ratios must be mass-weighted were added as well, so neither
+mistake can hide behind a loose tolerance again.
 
 ### 4.6 Two orogene `208Pb/204Pb` cells in Table IV are OCR errors
 
@@ -203,12 +242,50 @@ contradict the physical trend:
 extraction is recorded here for checking. Every other column passes a
 monotonicity check.
 
+**The corrections are confirmed independently by the model**: the corrected
+implementation gives 30.550 at t = 4.0 and 35.769 at t = 1.6, within 0.000 and
+0.001 of the adopted values, while 36.77 cannot be produced by any parameter
+combination.
+
 ### 4.7 Environment
 
 `scripts/run_version4.py` needs `pandas`; if `pandas` and `pytz` versions are
 mismatched it raises `ImportError: Can't determine version for pytz`. The model
 itself (`version4.py`) does not depend on pandas and can be driven from the
 standard library alone.
+
+### 4.8 Two sub-reservoir targets in the Version IV table come from OCR misreads (**not fixed**)
+
+`outputs/results/literature/` now holds the source images of both comparison
+tables. Checking `haines_zartman_1988_table_4_page2.png` (PLUMBO Table 4, page
+2) shows that the report's PDF **text layer** is scan OCR with a systematic
+`4` -> `1` confusion:
+
+| Cell | value in the image | text-layer OCR | value used here |
+|---|---|---|---|
+| lower `238U/204Pb` | `6.49030` | `6.19030` | 6.4903 (corrected) |
+| upper `232Th/204Pb` | `43.01600` | `13.01600` | 43.016 (corrected) |
+| **sub `207Pb/204Pb`** | **`15.44000`** | `15.11000` | **15.110 (still the misread)** |
+| **sub `232Th/204Pb`** | **`35.54200`** | `35.51200` | **35.512 (still the misread)** |
+
+`15.440` and `35.542` are independently corroborated by the Subcrustal
+Lithosphere column of Zartman & Haines (1988), Table 1 (207Pb/204Pb = 15.44).
+
+**Impact**: the "all 24 ratios satisfy `abs(diff) < 0.02`" conclusion of
+section 1 does not hold for subcrustal `207Pb/204Pb` -- the model's 15.109975 is
+**0.33** away from the printed 15.44000, not the 0.00003 recorded in the table.
+(Fixing `35.512` -> `35.542` would likewise turn that row's +0.00993 into
+-0.0201, past the 0.02 tolerance.)
+
+**Status**: not fixed. This is no longer a transcription question: the Version IV
+subcrustal reservoir itself (`207Pb/204Pb` low by 0.33, while 206/204, 208/204
+and 238U/204Pb of the same reservoir all match) needs its own diagnosis. The
+targets are deliberately left untouched until that is done, so the gap is not
+papered over by tuning.
+
+> Lesson: **literature values must be read off the image, not transcribed from
+> the text layer of a scanned PDF.** Version I's two tables were verified
+> against the image and recomputed independently, so they are unaffected.
 
 ## 5. How to reproduce
 

@@ -113,27 +113,53 @@ $$
 M_u^{\mathrm{new}} = M_l^{\mathrm{new}} = 2.6\times10^{24}\ \mathrm{g},
 $$
 
-剩余造山带物质返回地幔。Pb、U、Th 在
-（返回地幔，新上地壳，新下地壳）之间的分配比为
+剩余造山带物质返回地幔，返回质量为
 
-| 元素 | 地幔 | 上地壳 | 下地壳 |
+$$
+M_{\mathrm{ret}} = M_{or} - 2.6 - 2.6 .
+$$
+
+Pb、U、Th 在三个**返回增量**（返回地幔 / 新上地壳 / 新下地壳）之间的
+分配比为
+
+| 元素 | $F^m$（地幔） | $F^u$（上地壳） | $F^l$（下地壳） |
 |---|---|---|---|
 | Pb | 0.028 | 0.754 | 0.218 |
 | U | 0.024 | 0.854 | 0.122 |
 | Th | 0.020 | 0.788 | 0.192 |
 
-即代码中的 `F_PB`、`F_U`、`F_TH`；三列之和均为 1。于是
+即代码中的 `F_PB`、`F_U`、`F_TH`。**这三个数是浓度比，不是份额**：每个
+返回增量分到的造山带含量正比于「自身质量 × 分配比」，再除以归一化因子
+$s$。这就是论文 eq. 17–19：
 
 $$
-X_m \leftarrow X_m - \Delta X_m + f^{\mathrm{Pb/U/Th}}_{\mathrm{mantle}} X_{or},
+s = M_{\mathrm{ret}}F^m + M_u^{\mathrm{new}}F^u + M_l^{\mathrm{new}}F^l,
 $$
 
-新上、下地壳段分别取 $f_{\mathrm{upper}}X_{or}$、$f_{\mathrm{lower}}X_{or}$。
+$$
+X_m^{\mathrm{ret}} = X_{or}\frac{M_{\mathrm{ret}}F^m}{s},\qquad
+X_u^{\mathrm{new}} = X_{or}\frac{M_u^{\mathrm{new}}F^u}{s},\qquad
+X_l^{\mathrm{new}} = X_{or}\frac{M_l^{\mathrm{new}}F^l}{s}.
+$$
+
+三者之和恰为 $X_{or}$，因此再分配过程本身不产生也不损失任何元素。
+
+> **为什么不能把分配比直接当份额用。** 返回地幔的质量（首轮 $M_{\mathrm{ret}}
+> = 94.8$）比每个新地壳段（2.6）大一到两个数量级，因此地幔首轮实际拿到
+> 造山带 Pb 的 $94.8\times0.028/s = 51.3\%$，而不是 $2.8\%$。把 `F_PB[0]`
+> 当作造山带含量的分数会抽干地幔、喂饱地壳，这正是本仓库早先 1.5 % 偏差的
+> 来源；修正前后的对照见 [`validation.md`](validation.md) §2.1。
+
+地幔的该元素总量更新为
+
+$$
+X_m \leftarrow X_m - \Delta X_m + X_m^{\mathrm{ret}},
+$$
 
 地幔质量更新为
 
 $$
-M_m \leftarrow M_m - \Delta M_m + (M_{or} - 2.6 - 2.6),
+M_m \leftarrow M_m - \Delta M_m + M_{\mathrm{ret}}.
 $$
 
 老上、下地壳段分别按 $M\leftarrow 0.63M$、$M\leftarrow 0.90M$ 收缩。
@@ -413,9 +439,9 @@ $$
 |---|---|---|
 | 储库 | 地幔、上/下地壳 | + 次地壳、MOR、造山带三分量 |
 | 旋回 | 11 × 0.4 Ga | 46 × 0.1 Ga |
-| 分配方式 | 固定分数 `F_PB`/`F_U`/`F_TH` | `FNEmoles` + 富集系数数组 |
+| 分配方式 | 分配比 `F_PB`/`F_U`/`F_TH` 按返回增量质量加权（eq. 17–19） | `FNEmoles` + 富集系数数组 |
 | 时间参数 | 无表 | Table 3 的 `A1`/`A4`/`A6`/`U`/`L`/`S` |
-| 校验目标 | Table IV 量级 | Table 4 精确值（< 0.02） |
+| 校验目标 | Table IV 全部 126 项 + Table II 第三节（印刷精度内） | Table 4 精确值（< 0.02） |
 
 ## 5. 参考文献
 

@@ -16,7 +16,7 @@ the scope of the guarantee. The raw validation data is in
 | 3. Regression | rerun 1+2 on every change | `pytest` (includes the figure layout check in `tests/test_plotting.py`) |
 
 Only when all three pass is a result considered "correct under the model
-definition". Current status: **14/14 passing**.
+definition". Current status: **18/18 passing**.
 
 ## 2. Layer 1: baseline validation
 
@@ -32,8 +32,20 @@ with a tolerance of `abs(diff) < 0.02`:
 ### 2.2 Version I -> Zartman & Doe (1981)
 
 - initial mantle: 206/204 = 10.36, 207/204 = 12.12, 208/204 = 30.55 (exact);
-- present-day mantle: **18.2525 / 15.4801 / 38.0631** against 18.25 / 15.48 /
-  38.06 of Table IV (tolerances 0.5 / 0.3 / 0.5).
+- whole-table reproduction: all **126 rows** of Table IV (11 cycles x 4
+  reservoirs x 3 ratios), worst difference **0.00509** (mantle `207/204` at
+  t = 1.6 Ga), i.e. the two-decimal printing limit of that table; worst
+  relative error 0.0349 %, RMSE 0.002729;
+- present-day mantle: 18.0782 / 15.4156 / 37.6804 against 18.08 / 15.42 / 37.68;
+- element abundances: all 12 entries of Table II section III.B (mass and
+  204Pb/238U/232Th) land within 1 %.
+
+Full comparison in [`validation.md`](validation.md) section 2.
+
+> Before 2026-09 this check only reached "present-day mantle, order 1 %". The
+> root cause was the orogene redistribution (eqs. 17-19) using the partition
+> ratios as direct fractions; the fix is recorded in
+> [`validation.md`](validation.md) section 2.1.
 
 ## 3. Layer 2: invariants
 
@@ -130,7 +142,9 @@ The same environment and version reproduce bit-identical results.
 |---|---|
 | Some copies of Table 4 print lower-crust `238U/204Pb` as 6.1903, inconsistent with the row | the self-consistent **6.4903** is used as the target and documented |
 | The printed Table 3 enrichment factors (integers) do not reproduce Table 4 | **calibrated** values are used (`E_a2` ... `F_c3`, `INIT_RATIOS`); the printed ones stay as an order-of-magnitude reference |
+| Two orogene `208Pb/204Pb` cells of Table IV are OCR errors | corrected values (30.55 / 35.77) are used, and the corrected model now confirms them independently, see [`validation.md`](validation.md) section 4.6 |
 | `history['orogene']` used to miss the proximal and wedge components | fixed, see [`validation.md`](validation.md) section 4.1 |
+| The Version I 1.5 % deviation was once blamed on a "self-inconsistent paper" | that conclusion was wrong and has been retracted; the real cause was the implementation of eqs. 17-19, now fixed, see [`validation.md`](validation.md) section 2.1 |
 
 Each inconsistency is recorded explicitly instead of being hidden behind
 tuned parameters.
@@ -155,9 +169,9 @@ for name in dir(t):
         print("ok", name)
 ```
 
-`scripts/run_version1.py` and `scripts/run_version4.py` write their results to
-`outputs/results/version1_history.csv` (the 11-cycle recursion) and
-`outputs/results/version4_comparison.csv` (the 24 Table 4 comparisons) for
+`scripts/run_version1.py` writes the 126 Table IV comparisons to
+`outputs/results/version1_comparison.csv` and `scripts/run_version4.py` writes
+the 24 Table 4 comparisons to `outputs/results/version4_comparison.csv`, for
 manual review.
 
 ## 9. Scope and limitations
