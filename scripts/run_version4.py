@@ -70,7 +70,9 @@ def main():
         os.path.join(os.path.dirname(__file__), "..", "outputs", "results", "version4_comparison.csv")
     )
     os.makedirs(os.path.dirname(out), exist_ok=True)
-    frame.to_csv(out, index=False, encoding="utf-8-sig")
+    # lineterminator: .gitattributes pins eol=lf, and pandas would otherwise
+    # write CRLF on Windows, so the working file would not match the blob
+    frame.to_csv(out, index=False, encoding="utf-8-sig", lineterminator="\n")
     print(f"Saved: {out}")
 
 
