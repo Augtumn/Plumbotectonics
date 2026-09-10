@@ -85,8 +85,47 @@ Present day (t = 0), model / Table IV:
 | lower crust | 17.0545 / 17.29 | 15.2018 / 15.30 | 37.9699 / 38.56 |
 
 **Conclusion**: Version I reproduces Table IV to about **1 %** (worst 1.53 %),
-roughly 50x worse than the 0.028 % of Version IV; `208Pb/204Pb` is
-systematically low by 0.9-1.5 %.
+roughly 50x worse than the 0.028 % of Version IV; `208Pb/204Pb` deviates most
+(lower crust -1.53 %, mantle +1.02 %).
+
+### 2.1 Where the deviation comes from: masses and parameters match, element partitioning does not
+
+Comparing the model's present-day inventories with Table II section III
+(element abundances):
+
+| Quantity | mantle model / paper | upper model / paper | lower model / paper | total |
+|---|---|---|---|---|
+| mass ($10^{24}$ g) | 775.176 / 775.2 | 6.983 / 7.0 | 17.841 / 17.8 | 800 / 800 ok |
+| 204Pb ($10^{15}$ mol) | **11.46 / 19.5** | **14.44 / 10.3** | **12.10 / 8.2** | 38 / 38 ok |
+| 238U | **104.40 / 174** | **174.71 / 127** | **69.88 / 48** | 349 / 349 ok |
+| 232Th | **383.61 / 619** | **560.77 / 430** | **390.62 / 286** | 1335 / 1335 ok |
+
+**The mass bookkeeping is exact**: the 0.63 / 0.90 shrink factors reproduce Table
+III (2.600 -> 4.238 -> 5.270 ... -> 6.983 and 2.600 -> 4.940 -> 7.046 ... ->
+17.841).
+
+**But the mantle keeps only 0.59-0.62 of the paper's amount while the crust gets
+30-48 % more**: the model strips too much out of the mantle and feeds too much
+into the crust. The 1.53 % Pb-isotope deviation is a downstream consequence.
+
+Every printed parameter checked so far matches the implementation: the $f_m$
+sequence (1/8, 1/16, 1/32, 1/64, then 1/128), 3/10 upper-crust erosion plus 1/10
+total-crust areal erosion (combining to 0.37), 2.6e24 g of new upper and lower
+crust per cycle, $E_m=4$, $E_u=E_l=1$, the Pb/U/Th partition ratios, the decay
+equations and the convention that parents are not depleted.
+
+The deviation therefore sits in the **mantle-to-orogene element extraction**,
+i.e. eq. 14:
+
+> $\Delta^{\alpha}N_{m} = (\Delta M_m / M_{?}) \cdot {}^{\alpha}N_m \cdot {}^{\alpha}E_m$
+
+The fraction is **unreadable in the scan** (OCR gives `(~~/~~)`), and the prose is
+itself contradictory - "the mantle contributes 1/8 of itself" versus
+"$E_m=4$ simulates complete extraction into a 25 % melt". Numerically, the two
+readings give 11.5 (the $f_m \cdot E_m$ reading used here) and 28.1 (the $f_m$
+reading) for the final mantle 204Pb, **neither matching the 19.5 of Table II**.
+That is an inconsistency between the paper's parameter text and its result
+tables, not something the implementation can fix on its own.
 
 ## 3. Conservation and invariants
 
