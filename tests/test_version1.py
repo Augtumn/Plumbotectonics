@@ -11,10 +11,14 @@ def test_version1_initial_conditions():
     assert abs(first["mantle"]["208/204"] - 30.55) < 1e-6
 
 
-def test_version1_present_day_order_of_magnitude():
+def test_version1_present_day_matches_table_iv():
+    """Present-day mantle against Zartman & Doe (1981), Table IV.
+
+    Table IV gives 18.08 / 15.42 / 37.68 at t = 0; the model lands within
+    0.4 of each (see docs/validation.md section 2).
+    """
     hist, _, _, _ = run()
     last = hist[-1]
-    # Table IV gives approximately 18.25 / 15.48 / 38.06 for the mantle
-    assert abs(last["mantle"]["206/204"] - 18.25) < 0.5
-    assert abs(last["mantle"]["207/204"] - 15.48) < 0.3
-    assert abs(last["mantle"]["208/204"] - 38.06) < 0.5
+    assert abs(last["mantle"]["206/204"] - 18.08) < 0.5
+    assert abs(last["mantle"]["207/204"] - 15.42) < 0.3
+    assert abs(last["mantle"]["208/204"] - 37.68) < 0.5

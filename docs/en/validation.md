@@ -63,20 +63,30 @@ Table 4**, not the printed Table 3 integers. The printed values (for Pb:
 `E_a2=80`, `F_a3=1.00`, `E_b1=40`, `E_b2=25`, `E_b3=25`, `F_c3=3.67`) are kept
 as an order-of-magnitude reference.
 
-## 2. Version I: order-of-magnitude check
+## 2. Version I: comparison with Table IV of Zartman & Doe (1981)
 
-`tests/test_version1.py` checks:
+`scripts/run_version1.py` compares 11 cycles x 4 reservoirs x 3 ratios (126
+rows) against Table IV and writes
+`outputs/results/version1_comparison.csv`:
 
-- initial mantle 206/204 = 10.36, 207/204 = 12.12, 208/204 = 30.55 (exact);
-- present-day mantle about 18.25 / 15.48 / 38.06 (tolerances 0.5 / 0.3 / 0.5).
-
-Measured present-day mantle:
-
-| Ratio | Model |
+| Metric | Value |
 |---|---|
-| 206/204 | 18.2525 |
-| 207/204 | 15.4801 |
-| 208/204 | 38.0631 |
+| max absolute difference | 0.590072 (lower `208/204`, t = 0) |
+| max percentage error | **1.5303 %** (lower `208/204`, t = 0) |
+| RMSE | 0.196491 |
+
+Present day (t = 0), model / Table IV:
+
+| Reservoir | 206/204 | 207/204 | 208/204 |
+|---|---|---|---|
+| mantle | 18.2525 / 18.08 | 15.4801 / 15.42 | 38.0631 / 37.68 |
+| orogene | 18.8099 / 18.88 | 15.5998 / 15.63 | 38.4603 / 38.82 |
+| upper crust | 19.2296 / 19.33 | 15.6945 / 15.73 | 38.5937 / 39.06 |
+| lower crust | 17.0545 / 17.29 | 15.2018 / 15.30 | 37.9699 / 38.56 |
+
+**Conclusion**: Version I reproduces Table IV to about **1 %** (worst 1.53 %),
+roughly 50x worse than the 0.028 % of Version IV; `208Pb/204Pb` is
+systematically low by 0.9-1.5 %.
 
 ## 3. Conservation and invariants
 
@@ -131,7 +141,30 @@ the docstring and the imports.
 `scipy` is in `[project.optional-dependencies].dev` but nothing imports it; keep
 it for future fitting work or drop it.
 
-### 4.5 Environment
+### 4.5 `tests/test_version1.py` used the wrong reference values
+
+The test used to compare against 18.25 / 15.48 / 38.06 and label them as Table
+IV, but Table IV actually gives **18.08 / 15.42 / 37.68**; 18.25 / 15.48 /
+38.06 is this implementation's own output. The tolerances (0.5 / 0.3 / 0.5)
+accept both, which is why the mistake never failed the suite. The assertions now
+use the real Table IV values and the comment is corrected.
+
+### 4.6 Two orogene `208Pb/204Pb` cells in Table IV are OCR errors
+
+Extracting Table IV from the text layer of
+`papers/Zartman_Doe_1981_Plumbotectonics.pdf` gives two orogene values that
+contradict the physical trend:
+
+| t (Ga) | Extracted | Used | Evidence |
+|---|---|---|---|
+| 4.0 | 30.65 | **30.55** | the other three reservoirs and the initial value are 30.55 |
+| 1.6 | 36.77 | **35.77** | breaks monotonicity (34.95 -> 36.77 -> 36.56) |
+
+`TABLE_IV` in `scripts/run_version1.py` uses the corrected values; the raw
+extraction is recorded here for checking. Every other column passes a
+monotonicity check.
+
+### 4.7 Environment
 
 `scripts/run_version4.py` needs `pandas`; if `pandas` and `pytz` versions are
 mismatched it raises `ImportError: Can't determine version for pytz`. The model

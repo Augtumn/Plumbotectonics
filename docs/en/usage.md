@@ -32,10 +32,14 @@ uv run python scripts/run_version1.py
 ```
 
 Prints the `206/204`, `207/204` and `208/204` ratios of the mantle, orogene,
-upper crust and lower crust for all 11 cycles. The same result is written to
-`outputs/results/version1_history.csv` in long form - one row per
-(cycle, reservoir, ratio) with the columns `cycle`, `t_Ga`, `reservoir`,
-`ratio` and `model`. Rows for reservoirs that do not exist yet are omitted.
+upper crust and lower crust for all 11 cycles. The same result is compared
+cycle by cycle against Table IV of Zartman & Doe (1981) (11 cycles x 4
+reservoirs x 3 ratios, 126 rows) and written to
+`outputs/results/version1_comparison.csv`.
+
+CSV columns: `t_Ga`, `reservoir`, `ratio`, `model`, `literature`, `abs_diff`
+and `rel_error_pct`. At t = 4.0 no crustal segment exists yet, so those rows
+are omitted.
 
 ### 3.2 Version IV (Table 4 comparison)
 
@@ -47,9 +51,9 @@ Compares the `dp=0.14` model against the 24 values of Haines & Zartman (1988),
 Table 4, writes `outputs/results/version4_comparison.csv` (UTF-8 with BOM) and
 prints the table to the terminal.
 
-CSV columns: `reservoir`, `ratio`, `model`, `table`, `abs_diff` (also a long
-table, sharing the `reservoir` / `ratio` / `model` columns with
-`version1_history.csv`).
+CSV columns are identical to `version1_comparison.csv`: `t_Ga`, `reservoir`,
+`ratio`, `model`, `literature`, `abs_diff` and `rel_error_pct` (`t_Ga` is
+always 0.0 here, i.e. present day).
 
 ### 3.3 Growth curves
 
@@ -129,10 +133,10 @@ pt.v4_ratios(pt.run_version4()["mantle"])
 ```
 outputs/
 |-- figures/   # version1_growth_curves.{png,pdf}, version4_growth_curves.{png,pdf}
-`-- results/   # version1_history.csv, version4_comparison.csv
+`-- results/   # version1_comparison.csv, version4_comparison.csv
 ```
 
-Directories are created automatically at run time. Both CSVs are long tables sharing the `reservoir` / `ratio` / `model` column names, so they can be concatenated.
+Directories are created automatically at run time. Both CSVs have exactly the same column layout, so they can be concatenated directly.
 
 ## 6. Tests
 

@@ -33,9 +33,11 @@ uv run python scripts/run_version1.py
 打印 11 个旋回在 `206/204`、`207/204`、`208/204` 上的
 地幔、造山带、上地壳、下地壳比值。
 
-同一份结果写入 `outputs/results/version1_history.csv`，长表格式——每个
-（旋回, 储库, 比值）一行，列为 `cycle`、`t_Ga`、`reservoir`、`ratio`、`model`。
-首轮尚无地壳段，对应行不写出。
+同一份结果逐项与 Zartman & Doe (1981) Table IV 对比（11 个旋回 × 4 个储库 ×
+3 个比值，共 126 行），写入 `outputs/results/version1_comparison.csv`。
+
+CSV 列：`t_Ga`、`reservoir`、`ratio`、`model`、`literature`、`abs_diff`、
+`rel_error_pct`。t = 4.0 尚无地壳段，对应行不写出。
 
 ### 3.2 Version IV（Table 4 对比）
 
@@ -47,8 +49,9 @@ uv run python scripts/run_version4.py
 逐项对比，输出 `outputs/results/version4_comparison.csv`（UTF-8-BOM），
 并在终端打印表格。
 
-CSV 列：`reservoir`、`ratio`、`model`、`table`、`abs_diff`（同为长表，与
-`version1_history.csv` 共用 `reservoir` / `ratio` / `model` 三列）。
+CSV 列与 `version1_comparison.csv` 完全相同：`t_Ga`、`reservoir`、`ratio`、
+`model`、`literature`、`abs_diff`、`rel_error_pct`（此处 `t_Ga` 恒为 0.0，
+即现今值）。
 
 ### 3.3 生长曲线图
 
@@ -128,10 +131,10 @@ pt.v4_ratios(pt.run_version4()["mantle"])
 ```
 outputs/
 ├── figures/   # version1_growth_curves.{png,pdf}, version4_growth_curves.{png,pdf}
-└── results/   # version1_history.csv, version4_comparison.csv
+└── results/   # version1_comparison.csv, version4_comparison.csv
 ```
 
-目录会在运行时自动创建。两份 CSV 均为长表，且共用 `reservoir` / `ratio` / `model` 三列名，便于拼接分析。
+目录会在运行时自动创建。两份 CSV 的列结构完全相同，可直接拼接分析。
 
 ## 6. 测试
 
