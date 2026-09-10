@@ -56,7 +56,7 @@ uv run python scripts/plot_growth_curves.py
 | 文件 | 内容 |
 |---|---|
 | `version1_growth_curves.png` / `.pdf` | Version I：三面板（207–206、208–206、206–t） |
-| `version4_growth_curves.png` / `.pdf` | Version IV：四面板（207–206、208–206、206–t、238U/204Pb–t） |
+| `version4_growth_curves.png` / `.pdf` | Version IV（标定参数）：四面板（207–206、208–206、206–t、238U/204Pb–t） |
 
 PNG 为 600 dpi，PDF 为矢量图。图内标题与坐标轴标签均为英文，不依赖中文字体。
 

@@ -112,7 +112,7 @@ def plot_version4_growth_curves(result: dict[str, Any], out_png: str, out_pdf: s
     ax.grid(alpha=0.3)
     ax.legend(fontsize=9)
 
-    fig.suptitle("PLUMBO version IV growth curves (calibrated parameters)", fontsize=15)
+    fig.suptitle("Plumbotectonics Version IV growth curves (Haines & Zartman, 1988)", fontsize=15)
     os.makedirs(os.path.dirname(os.path.abspath(out_png)), exist_ok=True)
     fig.savefig(out_png, dpi=600, bbox_inches="tight")
     if out_pdf:
@@ -179,7 +179,7 @@ def plot_version1_growth_curves(history: list[dict[str, Any]], out_png: str, out
     ax.grid(alpha=0.3)
     ax.legend(fontsize=8)
 
-    fig.suptitle("Zartman & Doe (1981) version I growth curves", fontsize=15)
+    fig.suptitle("Plumbotectonics Version I growth curves (Zartman & Doe, 1981)", fontsize=15)
     os.makedirs(os.path.dirname(os.path.abspath(out_png)), exist_ok=True)
     fig.savefig(out_png, dpi=600, bbox_inches="tight")
     if out_pdf:

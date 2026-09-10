@@ -33,6 +33,8 @@ def _assert_layout(fig, name):
     canvas = fig.get_window_extent(renderer)
     assert box.y1 <= canvas.y1 + 0.5, "%s: suptitle above canvas (%.1f > %.1f)" % (name, box.y1, canvas.y1)
     assert box.y0 >= canvas.y0 - 0.5, "%s: suptitle below canvas" % name
+    assert box.x0 >= canvas.x0 - 0.5, "%s: suptitle clipped on the left" % name
+    assert box.x1 <= canvas.x1 + 0.5, "%s: suptitle clipped on the right (%.1f > %.1f)" % (name, box.x1, canvas.x1)
     for index, ax in enumerate(fig.axes):
         title = ax.title.get_window_extent(renderer)
         assert not box.overlaps(title), "%s: suptitle overlaps axes[%d] title" % (name, index)

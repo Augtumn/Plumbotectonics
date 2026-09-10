@@ -57,7 +57,7 @@ Writes into `outputs/figures/`:
 | File | Contents |
 |---|---|
 | `version1_growth_curves.png` / `.pdf` | Version I: three panels (207-206, 208-206, 206-t) |
-| `version4_growth_curves.png` / `.pdf` | Version IV: four panels (207-206, 208-206, 206-t, 238U/204Pb-t) |
+| `version4_growth_curves.png` / `.pdf` | Version IV (calibrated parameters): four panels (207-206, 208-206, 206-t, 238U/204Pb-t) |
 
 PNG output is 600 dpi, PDF is vector. All figure text is English, so no CJK font is required.
 
