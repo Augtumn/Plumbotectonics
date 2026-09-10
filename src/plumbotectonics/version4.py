@@ -2,10 +2,19 @@
 # -*- coding: utf-8 -*-
 """PLUMBO version IV model (Haines & Zartman, 1988).
 
-Reference:
-    Haines, S. M., and Zartman, R. E., 1988, PLUMBO: A Hewlett-Packard
-    Series 200 BASIC language program for version IV of plumbotectonics:
-    U.S. Geological Survey Open-File Report 88-269.
+References:
+    Haines, S. M., & Zartman, R. E. (1988). PLUMBO; a Hewlett-Packard Series
+    200 BASIC language program for version IV of plumbotectonics (Open-File
+    Report 88-269). U.S. Geological Survey.
+    https://doi.org/10.3133/ofr88269
+
+    Zartman, R. E., & Haines, S. M. (1988). The plumbotectonic model for Pb
+    isotopic systematics among major terrestrial reservoirs - a case for
+    bi-directional transport. Geochimica et Cosmochimica Acta, 52(6),
+    1327-1339. https://doi.org/10.1016/0016-7037(88)90204-9
+
+    The bi-directional transport implemented by the gates is described in
+    the second reference.
 """
 import math
 

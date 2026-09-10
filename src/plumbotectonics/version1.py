@@ -2,8 +2,9 @@
 """Version I plumbotectonics model (Zartman & Doe, 1981).
 
 Reference:
-    Zartman, R. E., and Doe, B. R., 1981, Plumbotectonics-the model:
-    Tectonophysics, 75, 135-162.
+    Zartman, R. E., & Doe, B. R. (1981). Plumbotectonics - the model.
+    Tectonophysics, 75(1-2), 135-162.
+    https://doi.org/10.1016/0040-1951(81)90213-4
 """
 import math
 

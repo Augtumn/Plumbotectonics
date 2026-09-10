@@ -173,6 +173,8 @@ $$
 
 ## 3. Version IV：PLUMBO / Haines & Zartman (1988)
 
+> 本章描述 PLUMBO 的实现（Haines & Zartman, 1988）。造山带三分量与双向物质交换（bi-directional transport，即 §3.5 的 gates）的物理依据另见 Zartman & Haines (1988)。
+
 实现：`plumbotectonics.version4.run()`
 
 ### 3.1 储库与状态数组
@@ -275,6 +277,8 @@ $$
 其中 $S_{re}=\sum S_h$，$S_{mant}$ 见 §3.5。
 
 ### 3.5 门（gates）
+
+> 门的符号与顺序取自 Haines & Zartman (1988) 的 BASIC 程序；造山带与次地壳/地幔之间双向交换的物理依据见 Zartman & Haines (1988)。
 
 $$
 \mathrm{Gate}_{b3} = B_3(U_k + L_k - P_{oro}),
@@ -413,8 +417,6 @@ $$
 
 ## 5. 参考文献
 
-- Zartman, R. E., and Doe, B. R., 1981, *Plumbotectonics-the model*:
-  Tectonophysics, 75, 135-162.
-- Haines, S. M., and Zartman, R. E., 1988, *PLUMBO: A Hewlett-Packard Series
-  200 BASIC language program for version IV of plumbotectonics*:
-  U.S. Geological Survey Open-File Report 88-269.
+1. Haines, S. M., & Zartman, R. E. (1988). PLUMBO; a Hewlett-Packard Series 200 BASIC language program for version IV of plumbotectonics. In *Open-File Report* (Nos. 88–269). U.S. Geological Survey. https://doi.org/10.3133/ofr88269
+2. Zartman, R. E., & Doe, B. R. (1981). Plumbotectonics—The model. *Tectonophysics*, *75*(1–2), 135–162. https://doi.org/10.1016/0040-1951(81)90213-4
+3. Zartman, R. E., & Haines, S. M. (1988). The plumbotectonic model for Pb isotopic systematics among major terrestrial reservoirs—A case for bi-directional transport. *Geochimica et Cosmochimica Acta*, *52*(6), 1327–1339. https://doi.org/10.1016/0016-7037(88)90204-9

@@ -27,6 +27,8 @@ Version I 是"地幔 + 地壳"的两储库质量平衡，使用固定的分配�
 Version IV（PLUMBO）增加了洋中脊（MOR）储库、次地壳岩石圈、造山带的三组分
 结构（远端 / 近端 / 楔形）以及显式的物质交换"门"（gates）。
 
+其中造山带与次地壳之间双向物质交换（bi-directional transport）的物理依据来自 Zartman & Haines (1988)。
+
 ## 安装
 
 ```bash
@@ -125,10 +127,10 @@ Version IV 以 Haines & Zartman (1988) Table 4 的现今值为标定目标。low
 
 ## 参考文献
 
-- Zartman, R. E., and Doe, B. R., 1981, *Plumbotectonics-the model*:
-  Tectonophysics, 75, 135-162.
-- Haines, S. M., and Zartman, R. E., 1988, *PLUMBO: A Hewlett-Packard Series
-  200 BASIC language program for version IV of plumbotectonics*:
-  U.S. Geological Survey Open-File Report 88-269.
+1. Haines, S. M., & Zartman, R. E. (1988). PLUMBO; a Hewlett-Packard Series 200 BASIC language program for version IV of plumbotectonics. In *Open-File Report* (Nos. 88–269). U.S. Geological Survey. https://doi.org/10.3133/ofr88269
+2. Zartman, R. E., & Doe, B. R. (1981). Plumbotectonics—The model. *Tectonophysics*, *75*(1–2), 135–162. https://doi.org/10.1016/0040-1951(81)90213-4
+3. Zartman, R. E., & Haines, S. M. (1988). The plumbotectonic model for Pb isotopic systematics among major terrestrial reservoirs—A case for bi-directional transport. *Geochimica et Cosmochimica Acta*, *52*(6), 1327–1339. https://doi.org/10.1016/0016-7037(88)90204-9
 
-两篇论文存放在 `papers/`。
+文献 3 给出造山带双向物质交换（bi-directional transport）的物理依据，对应本项目的 gates 实现。
+
+`papers/` 收录了文献 1 与 2 的 PDF；文献 3 未附本地副本。
