@@ -24,7 +24,7 @@
 | `V4_MASS0` … `V4_CYCLES` | 见文件 | Version IV 初始条件与开关 |
 
 > 注意：`version1.py` 与 `version4.py` 目前各自硬编码了这些常量，
-> 修改 `constants.py` 不会影响两个模型（见 [`validation.md`](validation.md) §4.2）。
+> 修改 `constants.py` 不会影响三个模型（见 [`validation.md`](validation.md) §4.2）。
 
 ## `plumbotectonics.version1`
 
@@ -132,6 +132,62 @@ Version IV 的摩尔分配函数（见 [`theory.md`](theory.md) §3.6）。**逐
 `U8U5`、`INIT_RATIOS`、`ISO`、`A1`、`A4`、`A5`、`A6`、`U`、`L`、`S`、
 `E_a2`、`F_a3`、`E_b1`、`E_b2`、`E_b3`、`F_c3`、`E_up`、`E_low`、`E_sub`
 （`A*`/`U`/`L`/`S`/`E_*` 现为 `np.ndarray`，索引方式不变）。
+
+## `plumbotectonics.china`
+
+李龙等 (2001) 中国大陆区域模型。算法沿用 Zartman & Doe (1981)（即 `version1`），
+只替换论文的表 1 与表 2，并把下地壳保留比例改为 $p^l=0.95$、残余造山带按 90 %
+返回地幔。**零自由参数**（未给出的量全部继承 ZD1981）。
+
+### `run(decay_parents=False, melt_model="zd1981", strict=True)`
+
+| 参数 | 默认 | 含义 |
+|---|---|---|
+| `decay_parents` | `False` | `False` = ZD1981 母体常数化；`True` = 论文 eqs. (9)(10) 母体真衰变（²³⁵U 独立跟踪）。**两者逐位等价** |
+| `melt_model` | `"zd1981"` | `"zd1981"` = $E_m$ 恒为 4；`"batch"` = 批式熔融 $E=1/f_m$ |
+| `strict` | `True` | 结束时断言元素总量守恒，违反则抛 `AssertionError` |
+
+返回 `(history, mantle, upper_segs, lower_segs)`：
+
+- `history`：11 个 dict，键为 `t`、`mantle`、`orogene`、`upper`、`lower`；
+  前三个储库的值为 `{'206/204', '207/204', '208/204'}`，**t=4.0 Ga 时
+  `upper`/`lower` 为 `None`**（该次造山前尚无地壳）；
+- `mantle`：dict，含 `mass` 与 `ISO_KEYS` 各项；
+- `upper_segs` / `lower_segs`：list of dict，每层一个（含 10 % 沉积岩层，
+  计入上地壳）。
+
+### `present_day(mantle, upper_segs, lower_segs)`
+
+返回 `{'mantle'|'upper'|'lower': {'238U/204Pb': float, 'Th/U': float}}`，
+即论文表 4 的两个量。
+
+### `check_conservation(mantle, upper, lower, decay_parents=False, rtol=1e-9)`
+
+校验元素总量。`decay_parents=False` 时检查 ²⁰⁴Pb、²³⁸U、²³²Th；`True` 时检查
+²⁰⁴Pb 与三个"子体+母体"之和（²³⁸U 本身会衰变到今天的 349，不再守恒）。
+返回各相对偏差的 dict，超限则抛 `AssertionError`。
+
+### `e_mantle(f_m, melt_model="zd1981")`
+
+地幔贡献物质的富集因子：`"zd1981"` 返回 4；`"batch"` 返回 $1/f_m$；
+其它取值抛 `ValueError`。
+
+### `ratios(res)` / `row_to_dict(row, mass)`
+
+与 `version1` 同名函数语义一致。
+
+### 模块常量
+
+| 常量 | 值 | 出处 |
+|---|---|---|
+| `R2060`/`R2070`/`R2080` | 10.17 / 12.07 / 30.56 | 论文表 1 |
+| `F_PB`/`F_U`/`F_TH` | (0.038, 0.727, 0.235) / (0.024, 0.865, 0.111) / (0.021, 0.817, 0.162) | 论文表 2，已换成 ZD1981 的 (幔, 上, 下) 列序 |
+| `P_UPPER`/`P_LOWER` | 0.63 / 0.95 | 论文 eq. (2) |
+| `E_M`/`E_U`/`E_L` | 4.0 / 1.0 / 1.0 | 论文 eq. (5) |
+| `RETURN` | 0.9 | 论文 eqs. (7)(8) |
+| `PB2040`/`U2380`/`TH2320` | 38 / 349 / 1335 | ZD1981 表 II（继承） |
+| `MASS0`/`NEW_U`/`NEW_L` | 800 / 2.6 / 2.6 | ZD1981 表 II（继承） |
+| `ISO_KEYS` | `("204","206","207","208","232","238","235")` | 比 `version1` 多带 ²³⁵U |
 
 ## `plumbotectonics.plotting`
 

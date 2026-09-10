@@ -6,7 +6,7 @@
 
 - Python >= 3.10
 - 运行依赖：`numpy`、`pandas`、`matplotlib`
-  - **两个模型本体只用 `numpy`**（状态以 ndarray 承载，逐旋回按切片运算）；
+  - **三个模型本体只用 `numpy`**（状态以 ndarray 承载，逐旋回按切片运算）；
   - `pandas` 仅 `scripts/run_version*.py` 的对比统计使用；
   - `matplotlib` 仅 `plotting.py` 绘图使用。
 - 开发依赖：`pytest`（`pyproject.toml` 的 dev extra 里还有 `scipy`，
@@ -56,7 +56,25 @@ CSV 列与 `version1_comparison.csv` 完全相同：`t_Ga`、`reservoir`、`rati
 `model`、`literature`、`abs_diff`、`rel_error_pct`（此处 `t_Ga` 恒为 0.0，
 即现今值）。
 
-### 3.3 生长曲线图
+### 3.3 中国区域模型（李龙等 2001 表 3 / 表 4 对比）
+
+```bash
+uv run python scripts/run_china.py
+```
+
+打印 11 个旋回的地幔、造山带、上地壳、下地壳比值，并分别给出与论文表 3
+（99 个生长曲线值）和表 4（6 个现今值）的对比统计、定性顺序检查与守恒偏差，
+写入 `outputs/results/china_comparison.csv`。
+
+CSV 列与另两张对比表相同（`t_Ga`、`reservoir`、`ratio`、`model`、
+`literature`、`abs_diff`、`rel_error_pct`）；表 4 的六行 `t_Ga` 为 0.0，
+`ratio` 取 `238U/204Pb` 或 `Th/U`。
+
+> **表 3 没有复现**（最大绝对偏差 0.6211，而该表印到 0.01）。这不是脚本故障：
+> 论文表 3 与表 4 互相矛盾，反演出的新成地壳质量相差约 13σ。详见
+> [`validation.md`](validation.md) §5。
+
+### 3.4 生长曲线图
 
 ```bash
 uv run python scripts/plot_growth_curves.py
@@ -102,7 +120,30 @@ for h in result["history"]:
     print(h["cycle"], h["time_Ga"], h["upper"])
 ```
 
-### 4.3 绘图
+### 4.3 中国区域模型
+
+```python
+from plumbotectonics import china
+
+history, mantle, upper_layers, lower_layers = china.run()
+
+for entry in history:
+    print(entry["t"], entry["mantle"], entry["upper"], entry["lower"])
+
+print(china.present_day(mantle, upper_layers, lower_layers))
+# {'mantle': {'238U/204Pb': ..., 'Th/U': ...}, 'upper': {...}, 'lower': {...}}
+
+# 两种物理约定（默认取论文/ZD1981 的写法）
+china.run(decay_parents=True)   # 论文 eqs. (9)-(10)，母体真衰变，²³⁵U 独立跟踪
+china.run(melt_model="batch")   # 批式熔融 E = 1/f_m
+```
+
+`history[0]`（t = 4.0 Ga）的 `upper` / `lower` 为 `None`：该次造山之前尚无地壳。
+`upper_layers` 中除每个旋回的新成层外，还含每轮的 10 % 沉积岩层。
+
+`run(strict=True)`（默认）在结束时断言元素总量守恒，违反即抛 `AssertionError`。
+
+### 4.4 绘图
 
 ```python
 from plumbotectonics.version1 import run as run_v1
@@ -119,7 +160,7 @@ res4 = run_v4(dp=0.14)
 plot_version4_growth_curves(res4, "v4.png", "v4.pdf")
 ```
 
-### 4.4 顶层导入
+### 4.5 顶层导入
 
 ```python
 import plumbotectonics as pt
@@ -127,6 +168,7 @@ import plumbotectonics as pt
 pt.run_version1()
 pt.run_version4(dp=0.14)
 pt.v4_ratios(pt.run_version4()["mantle"])
+pt.china.run()
 ```
 
 ## 5. 输出目录
@@ -134,12 +176,12 @@ pt.v4_ratios(pt.run_version4()["mantle"])
 ```
 outputs/
 ├── figures/   # version1_growth_curves.{png,pdf}, version4_growth_curves.{png,pdf}
-└── results/   # version1_comparison.csv, version4_comparison.csv
-    └── literature/   # 两张表所引文献值的原始出处截图（静态资源，非生成物）
+└── results/   # version1_comparison.csv, version4_comparison.csv, china_comparison.csv
+    └── literature/   # 各表所引文献值的原始出处截图（静态资源，非生成物）
 ```
 
 `figures/` 与 `results/*.csv` 会在运行时自动创建；`results/literature/` 是随
-仓库提交的静态图片（见其 `README.md`）。两份 CSV 的列结构完全相同，可直接
+仓库提交的静态图片（见其 `README.md`）。三份 CSV 的列结构完全相同，可直接
 拼接分析。
 
 ## 6. 测试
@@ -159,5 +201,6 @@ uv run pytest
 | `No module named pytest` | 未装开发依赖 | `uv sync --extra dev` |
 | `ImportError: Can't determine version for pytz` | pandas 与 pytz 版本不匹配 | `uv pip install -U --force-reinstall pytz pandas` |
 | `run_version4.py` 较慢 | 46 个旋回 × 6 种同位素 | 正常，通常几秒内完成 |
+| `china.run()` 抛 `AssertionError: ... not conserved` | 元素总量守恒被破坏（改分配系数或改残余造山带去向时最易发生） | 用 `china.check_conservation()` 定位是哪种核素；`run(strict=False)` 可临时绕过，但不应提交 |
 
 > `plotting.py` 已设置 `matplotlib.use("Agg")`，可在无显示环境（服务器/CI）运行。

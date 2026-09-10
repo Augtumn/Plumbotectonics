@@ -9,11 +9,11 @@
 
 | 层 | 手段 | 产物 |
 |---|---|---|
-| ① 基准校验 | 与论文印刷值逐项对比 | `tests/test_version1.py`、`tests/test_version4.py` |
-| ② 不变量校验 | 守恒量与结构约束 | `tests/test_conservation.py` |
+| ① 基准校验 | 与论文印刷值逐项对比 | `tests/test_version1.py`、`tests/test_version4.py`、`tests/test_china.py` |
+| ② 不变量校验 | 守恒量与结构约束 | `tests/test_conservation.py`、`tests/test_china.py` |
 | ③ 回归测试 | 每次改动重跑 ①+② | `pytest`（含 `tests/test_plotting.py` 的图形布局与 PDF 无时间戳检查） |
 
-三层全部通过，才认为结果"在模型定义下正确"。当前实测：**22/22 通过**。
+三层全部通过，才认为结果"在模型定义下正确"。当前实测：**33/33 通过**。
 
 ## 2. ① 基准校验
 
@@ -41,16 +41,33 @@ Table 4 给出 4 个储库 × 6 个比值的现今值，共 24 项。模型以 `
 > （论文 eq. 17–19）把分配比误用为直接分数；修复记录见
 > [`validation.md`](validation.md) §2.1。
 
+### 2.3 中国模型 → 李龙等 (2001) 表 3、表 4
+
+| 数据 | 项数 | 最大绝对偏差 | 平均 | RMSE | 判据 |
+|---|---|---|---|---|---|
+| 论文表 4（现今 `238U/204Pb`、`Th/U`） | 6 | 0.4715 | 0.1793 | 0.2353 | `abs < 0.5` / `abs < 0.10`（`Th/U`） |
+| 论文表 3（生长曲线） | 99 | 0.6211 | 0.2199 | 0.2719 | **未复现**，仅以回归上限 0.65 / 0.25 钉住 |
+
+该模型**零自由参数**：论文未印的初始丰度、新成地壳质量、$k_i$ 与衰变常数全部
+继承 Zartman & Doe (1981)。
+
+> **表 3 明确列为未复现**，理由是论文这两张结果表互相矛盾：从表 3 反演得到的新成
+> 地壳质量为 $15.15 \pm 0.96$，从表 4 反演得到 $1.28 \pm 0.48$，相差约 13σ。
+> 因此 `tests/test_china.py` 不去断言"复现"，而是钉住偏差上限，防止将来悄悄
+> 变坏。完整分析与论文自身的 5 处内部不一致见
+> [`validation.md`](validation.md) §5。
+
 ## 3. ② 不变量校验
 
 ### 3.1 质量守恒（精确，最强回归信号）
 
-两个模型的物质再分配都是"取出 → 混合 → 再分配"，既不产生也不损失质量：
+三个模型的物质再分配都是"取出 → 混合 → 再分配"，既不产生也不损失质量：
 
 | 模型 | 初始质量 | 实测终态 | 偏差 |
 |---|---|---|---|
 | Version I | 800.0 | 800.000000000 | 0 |
 | Version IV | 1050.0 | 1050.000000000 | 0 |
+| 中国模型 | 800.0 | 800.000000000 | 0 |
 
 Version IV 四储库终态（$10^{24}$ g）：
 
@@ -61,13 +78,29 @@ Version IV 四储库终态（$10^{24}$ g）：
 任何一个分配系数写错，都会立刻破坏这条恒等式，因此它比"比值接近论文值"
 更灵敏。
 
+中国模型另有一层更细的元素守恒：²⁰⁴Pb、²³⁸U、²³²Th 的**摩尔总量**在 11 个旋回
+后相对初始值的偏差为 **0**（`strict=True` 时由 `run()` 内部断言，超限即抛
+`AssertionError`）。切换到 `decay_parents=True` 后，守恒的是"子体 + 母体"之和
+（²⁰⁶Pb + ²³⁸U 等），因为母体本身会衰变到今天的 349。
+
+> 这条不变量抓出过一个真实错误：残余造山带中不返回地幔的那 10 % 曾被直接丢弃，
+> 使系统总质量从 800 掉到 780.2。按论文假设 (3d) 它应成为上地壳沉积岩，修正后
+> 恢复 800.000000000。它还抓出过另一处：$E_m$ 若只作用于造山带增益而不作用于
+> 地幔亏损，每跑一次全系统元素翻倍（末态／初始 1.96 / 1.93 / 1.91）。详见
+> [`validation.md`](validation.md) §5.5。
+
 ### 3.2 结构不变量
 
 - Version I 每个旋回恰好新增 1 个上地壳段 + 1 个下地壳段，共 11 + 11 个；
 - Version I 所有段的质量与同位素摩尔数始终为正（不出现负储库）；
 - Version IV `history` 恰好 46 条，`cycle` 为 1–46，时间为 4.4 → 0.0 Ga；
 - Version IV `total[h] == mantle[h] + upper[h] + lower[h] + sub[h]`（h = 1..6）；
-- Version IV 地幔 `206Pb/204Pb` 随地质时间单调递增（放射性成因 Pb 只增不减）。
+- Version IV 地幔 `206Pb/204Pb` 随地质时间单调递增（放射性成因 Pb 只增不减）；
+- 中国模型每个旋回恰好新增 1 个上地壳段 + 1 个下地壳段 + 1 个沉积岩段（10 %
+  残余造山带）与 1 个下地壳段，共 11 × 3 段上地壳侧、11 段下地壳侧；
+- 中国模型地幔、上地壳、下地壳的 `238U/204Pb`（现今）满足
+  上地壳 > 地幔 > 下地壳，且 `206Pb/204Pb` 满足同样的顺序——这是论文全部源区
+  判别论证的前提，一旦顺序反转，论文的图 2／图 3 解释即不成立。
 
 ## 4. 总摩尔数**不**守恒（模型约定，不是缺陷）
 
@@ -111,7 +144,7 @@ $$
 `tests/test_conservation.py` 覆盖了 `FNEmoles` 的两个守卫分支与 `ratios` 的
 零分母分支。
 
-**浮点精度实测**（两个模型用 NumPy 数组承载状态，`np.exp` 做衰变）：
+**浮点精度实测**（各模型均用 NumPy 数组承载状态，`np.exp` 做衰变）：
 
 | 项 | 实测 |
 |---|---|
@@ -132,7 +165,7 @@ $$
 
 ## 6. 可复现性
 
-- **依赖边界**：两个模型只用 **NumPy**（`version1.py`、`version4.py` 均
+- **依赖边界**：三个模型只用 **NumPy**（`version1.py`、`version4.py`、`china.py` 均
   `import numpy as np`），不再需要 `math`，也不读任何外部数据文件；
   `pandas` 只用于 `scripts/` 的对比统计，`matplotlib` 只用于绘图；
 - **完全确定性**：全流程无随机数、无时间戳、无并行归约顺序不确定；
@@ -211,5 +244,7 @@ jobs:
 1. Haines, S. M., & Zartman, R. E. (1988). PLUMBO; a Hewlett-Packard Series 200 BASIC language program for version IV of plumbotectonics. In *Open-File Report* (Nos. 88–269). U.S. Geological Survey. https://doi.org/10.3133/ofr88269
 2. Zartman, R. E., & Doe, B. R. (1981). Plumbotectonics—The model. *Tectonophysics*, *75*(1–2), 135–162. https://doi.org/10.1016/0040-1951(81)90213-4
 3. Zartman, R. E., & Haines, S. M. (1988). The plumbotectonic model for Pb isotopic systematics among major terrestrial reservoirs—A case for bi-directional transport. *Geochimica et Cosmochimica Acta*, *52*(6), 1327–1339. https://doi.org/10.1016/0016-7037(88)90204-9
+4. 李龙, 郑永飞, 周建波 (2001). 中国大陆地壳铅同位素演化的动力学模型. *岩石学报*, *17*(1), 61–68.
 
-基准校验目标（Table 4）出自文献 1；Version I 的定义出自文献 2；gates 的物理依据出自文献 3。
+基准校验目标（Table 4）出自文献 1；Version I 的定义出自文献 2；gates 的物理依据出自文献 3；
+中国区域模型的来源与校验目标（表 3、表 4）出自文献 4。

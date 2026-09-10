@@ -2,9 +2,9 @@
 
 > **English** | [简体中文](../theory.md)
 
-This document describes the calculation flow of the two models (Version I and
-Version IV) and maps it onto `src/plumbotectonics/version1.py` and
-`version4.py`.
+This document describes the calculation flow of the three models (Version I,
+Version IV and the China regional model) and maps it onto
+`src/plumbotectonics/version1.py` and `version4.py`.
 
 ## 1. Overall framework
 
@@ -454,7 +454,118 @@ where $T=T_k$ and $\Delta T=0.1$ Ga.
 
 ---
 
-## 4. Comparison of the two versions
+## 4. China regional model: Li et al. (2001)
+
+### 4.1 Positioning
+
+The paper builds a regional model for continental China on the basis of the
+"plumbotectonic model" (a precedent being Godwin & Sinclair (1982) for western
+Canada). Its central claim is that **continental China evolved from a system
+that is relatively U-poor and Th-rich, and whose upper and lower crust
+differentiated more thoroughly**; the argument rests on two qualitative points
+-- the self-consistency of the source region indicated by granite feldspar data
+on the model curves, and the agreement of the model ages with other methods.
+The paper does **not** claim to reproduce any numerical table.
+
+This implementation takes: **the algorithm follows Zartman & Doe (1981)** (i.e.
+`version1`), replacing only the two tables the paper prints itself.
+
+### 4.2 Differences from Version I
+
+| Aspect | Version I | China model |
+|---|---|---|
+| 4.0 Ga initial ratios | 10.36 / 12.12 / 30.55 | **10.17 / 12.07 / 30.56** (paper Table 1) |
+| Partition ratios | Pb 0.028/0.754/0.218 etc. | **paper Table 2**: Pb 0.038/0.235/0.727, U 0.024/0.111/0.865, Th 0.021/0.162/0.817 |
+| Lower-crust retention $p^l$ | 0.90 (erosion 0.10) | **0.95** (erosion 0.05) (paper eq. 2) |
+| Residual orogene | 100 % returned to the mantle | **90 %** returned, 10 % becomes upper-crust sediment (paper eqs. 7-8, assumption 3d) |
+| Initial abundances, masses, $k_i$, decay constants | ZD1981 | **inherited from ZD1981** (not given by the paper) |
+
+Mind the column order of the partition ratios: the paper's Table 2 prints them
+as **(mantle, LOWER crust, UPPER crust)**, the opposite of the (mantle, upper
+crust, lower crust) order of ZD1981 Table II, so `F_PB[2]` in `china.py` is the
+upper crust.
+
+### 4.3 Where the residual 10 % of the orogene goes
+
+Paper assumption (3d): the bulk of the residual orogene returns to the mantle
+quickly, but "part of it still remains at the crustal edge or is eroded to
+become sedimentary rock". Taking that amount to be 10 % of the orogene total,
+the mantle receives
+
+$$\Delta M_m = 0.9 \times \Delta M_o$$
+
+**That 10 % cannot be discarded** -- discarding it drops the total mass of the
+system from 800 to 780.2 ($\times10^{24}$ g). By the paper's semantics it
+becomes sedimentary rock, which belongs to the upper crust, so it joins the
+upper crust as its own layer and is subsequently eroded at $p^u$ along with the
+other upper-crust layers.
+
+### 4.4 Which side $E_m$ acts on
+
+Paper eq. (5) speaks of "the chemical elements **entering the orogene**":
+
+$$\Delta^\alpha N_r^i = \frac{\Delta M_r^i}{M_r^i} \cdot {}^\alpha N_r^i \cdot {}^\alpha E^r$$
+
+It specifies the orogene's **gain** and does not separately write the mantle's
+**loss**. Physically the two must be equal: when the mantle partially melts, the
+mass taken out is $f_m M_m$ and the concentration of the extracted material is
+$E_m$ times the mantle's own ($E_m=4$ corresponds to 25 % melting), so
+
+$$\Delta N_{\text{loss}} = f_m M_m \times E_m \frac{N_m}{M_m} = f_m E_m N_m$$
+
+**This is exactly the amount the orogene receives.** If the mantle lost only
+$f_m N_m$ while the orogene still received $f_m E_m N_m$, the difference
+$(E_m-1) f_m N_m$ would be **created out of nothing** at every orogeny;
+measured, final/initial is 1.965 for 204Pb, 1.926 for 238U and 1.914 for 232Th,
+i.e. the element inventory of the whole system doubles. This implementation
+therefore makes **the mantle loss carry $E_m$**; the conservation check is in
+`validation.md` section 5.5.
+
+### 4.5 Two equivalent decay parameterisations
+
+| | constant parents (default) | parents really decay (paper eqs. 9-10) |
+|---|---|---|
+| parents | fixed at modern-equivalent abundances (238U = 349) | actual 4.0 Ga abundances (238U = 649.09) |
+| daughter increment | $e^{\lambda t} - e^{\lambda t'}$ | $1 - e^{-\lambda \Delta t}$ |
+| 207Pb parent | $^{238}\text{U}/137.88$ | separately tracked 235U |
+| 238U/235U (4.0 Ga) | implicitly 137.88 | **4.9897** (27.6 times today's) |
+
+**The two are equivalent digit for digit** (maximum difference
+$2.1\times10^{-14}$): because "constant parents + 349/1335" and "decaying
+parents + back-calculated actual abundances 649/1627" are two ways of writing
+the same thing. The `decay_parents` switch selects between them and defaults to
+the ZD1981 form.
+
+### 4.6 $E_m=4$ with a falling $f_m$
+
+The paper explains $E_m=4$ as "simulating 25 % melting of the average mantle,
+with all the melt entering the orogene", while $k_i$ falls from 1/8 to 1/128.
+Under batch melting the enrichment factor of a perfectly incompatible element
+($D=0$) is
+
+$$E = \frac{1}{D + F(1-D)} = \frac{1}{F}$$
+
+i.e. $E=8$ at $f_m=1/8$ and $E=128$ at $f_m=1/128$. A fixed $E=4$ is a
+simplifying convention of ZD1981, not a batch-melting result.
+`melt_model="batch"` provides the alternative $E=1/f_m$; measured, it is
+actually worse (Table 3 worst deviation 1.18 against 0.62), so the default
+keeps the paper's convention.
+
+### 4.7 Accuracy
+
+| Data | max absolute difference | mean | RMSE |
+|---|---|---|---|
+| paper Table 3 (99 values) | 0.6211 | 0.2199 | 0.2719 |
+| paper Table 4 (6 values) | 0.4715 | 0.1793 | 0.2353 |
+
+**Table 3 is not reproduced** (the table is printed to 0.01). The new-crustal
+masses inverted from Table 3 and from Table 4 differ by about 13 sigma, which
+shows that **the paper's two tables are mutually incompatible**. See
+`validation.md` section 5.
+
+---
+
+## 5. Comparison of the two versions
 
 | Aspect | Version I | Version IV |
 |---|---|---|
@@ -464,8 +575,12 @@ where $T=T_k$ and $\Delta T=0.1$ Ga.
 | Time parameters | none | Table 3 `A1`/`A4`/`A6`/`U`/`L`/`S` |
 | Validation target | all 126 Table IV values + Table II section III, to print precision | Table 4 exact values (< 0.02) |
 
-## 5. References
+The relationship between the China model and Version I is described in
+section 4.2: the same algorithm with only the two tables replaced.
+
+## 6. References
 
 1. Haines, S. M., & Zartman, R. E. (1988). PLUMBO; a Hewlett-Packard Series 200 BASIC language program for version IV of plumbotectonics. In *Open-File Report* (Nos. 88–269). U.S. Geological Survey. https://doi.org/10.3133/ofr88269
 2. Zartman, R. E., & Doe, B. R. (1981). Plumbotectonics—The model. *Tectonophysics*, *75*(1–2), 135–162. https://doi.org/10.1016/0040-1951(81)90213-4
 3. Zartman, R. E., & Haines, S. M. (1988). The plumbotectonic model for Pb isotopic systematics among major terrestrial reservoirs—A case for bi-directional transport. *Geochimica et Cosmochimica Acta*, *52*(6), 1327–1339. https://doi.org/10.1016/0016-7037(88)90204-9
+4. Li, L., Zheng, Y., & Zhou, J. (2001). Dynamic model for Pb isotope evolution in the continental crust of China. *Acta Petrologica Sinica*, *17*(1), 61–68.

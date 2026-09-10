@@ -6,8 +6,8 @@
 
 - Python >= 3.10
 - Runtime: `numpy`, `pandas`, `matplotlib`
-  - **the two models themselves use only `numpy`** (state held in ndarrays, each
-    cycle applied to whole slices);
+  - **the three models themselves use only `numpy`** (state held in ndarrays,
+    each cycle applied to whole slices);
   - `pandas` is used only by the comparison statistics in
     `scripts/run_version*.py`;
   - `matplotlib` is used only for plotting in `plotting.py`.
@@ -60,7 +60,27 @@ CSV columns are identical to `version1_comparison.csv`: `t_Ga`, `reservoir`,
 `ratio`, `model`, `literature`, `abs_diff` and `rel_error_pct` (`t_Ga` is
 always 0.0 here, i.e. present day).
 
-### 3.3 Growth curves
+### 3.3 China regional model (Li et al. 2001, Table 3 / Table 4 comparison)
+
+```bash
+uv run python scripts/run_china.py
+```
+
+Prints the mantle, orogene, upper-crust and lower-crust ratios of the 11 cycles,
+then the comparison statistics against the paper's Table 3 (99 growth-curve
+values) and Table 4 (6 present-day values), the qualitative-ordering check and
+the conservation deviation, and writes `outputs/results/china_comparison.csv`.
+
+CSV columns are the same as in the other two comparison tables (`t_Ga`,
+`reservoir`, `ratio`, `model`, `literature`, `abs_diff`, `rel_error_pct`); the
+six Table 4 rows have `t_Ga` 0.0 and `ratio` either `238U/204Pb` or `Th/U`.
+
+> **Table 3 is not reproduced** (worst absolute deviation 0.6211, against a
+> table printed to 0.01). This is not a script failure: the paper's Tables 3 and
+> 4 contradict each other, and the new-crustal masses inverted from them differ
+> by about 13 sigma. See [`validation.md`](validation.md) section 5.
+
+### 3.4 Growth curves
 
 ```bash
 uv run python scripts/plot_growth_curves.py
@@ -106,7 +126,32 @@ for h in result["history"]:
     print(h["cycle"], h["time_Ga"], h["upper"])
 ```
 
-### 4.3 Plotting
+### 4.3 China regional model
+
+```python
+from plumbotectonics import china
+
+history, mantle, upper_layers, lower_layers = china.run()
+
+for entry in history:
+    print(entry["t"], entry["mantle"], entry["upper"], entry["lower"])
+
+print(china.present_day(mantle, upper_layers, lower_layers))
+# {'mantle': {'238U/204Pb': ..., 'Th/U': ...}, 'upper': {...}, 'lower': {...}}
+
+# the two physical conventions (the default follows the paper / ZD1981)
+china.run(decay_parents=True)   # paper eqs. (9)-(10), parents really decay, 235U tracked separately
+china.run(melt_model="batch")   # batch melting, E = 1/f_m
+```
+
+`history[0]` (t = 4.0 Ga) has `upper` / `lower` equal to `None`: no crust
+existed before that orogeny. Besides the newly formed layer of each cycle,
+`upper_layers` also contains the 10 % sediment layer of each cycle.
+
+`run(strict=True)` (the default) asserts element conservation at the end,
+raising `AssertionError` on violation.
+
+### 4.4 Plotting
 
 ```python
 from plumbotectonics.version1 import run as run_v1
@@ -123,7 +168,7 @@ res4 = run_v4(dp=0.14)
 plot_version4_growth_curves(res4, "v4.png", "v4.pdf")
 ```
 
-### 4.4 Top-level imports
+### 4.5 Top-level imports
 
 ```python
 import plumbotectonics as pt
@@ -131,6 +176,7 @@ import plumbotectonics as pt
 pt.run_version1()
 pt.run_version4(dp=0.14)
 pt.v4_ratios(pt.run_version4()["mantle"])
+pt.china.run()
 ```
 
 ## 5. Output directory
@@ -138,13 +184,13 @@ pt.v4_ratios(pt.run_version4()["mantle"])
 ```
 outputs/
 |-- figures/   # version1_growth_curves.{png,pdf}, version4_growth_curves.{png,pdf}
-`-- results/   # version1_comparison.csv, version4_comparison.csv
-    `-- literature/   # source images of the literature values (static, not generated)
+`-- results/   # version1_comparison.csv, version4_comparison.csv, china_comparison.csv
+    `-- literature/   # source images of the literature values quoted by the tables (static, not generated)
 ```
 
 `figures/` and `results/*.csv` are created automatically at run time;
 `results/literature/` holds static images committed with the repository (see its
-`README.md`). Both CSVs have exactly the same column layout, so they can be
+`README.md`). All three CSVs have exactly the same column layout, so they can be
 concatenated directly.
 
 ## 6. Tests
@@ -164,6 +210,7 @@ running from the repository root is enough.
 | `No module named pytest` | dev dependencies not installed | `uv sync --extra dev` |
 | `ImportError: Can't determine version for pytz` | pandas / pytz version mismatch | `uv pip install -U --force-reinstall pytz pandas` |
 | `run_version4.py` is slow | 46 cycles x 6 isotopes | expected, usually a few seconds |
+| `china.run()` raises `AssertionError: ... not conserved` | the element inventory has been broken (most likely when changing partition ratios or the destination of the residual orogene) | use `china.check_conservation()` to locate which nuclide; `run(strict=False)` bypasses it temporarily, but should not be committed |
 
 > `plotting.py` sets `matplotlib.use("Agg")`, so it also runs headless
 > (servers, CI).

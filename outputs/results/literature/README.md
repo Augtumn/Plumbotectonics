@@ -1,8 +1,8 @@
 # 文献原图（对比表的数据来源）
 
-本目录存放 `../version1_comparison.csv` 与 `../version4_comparison.csv` 中
-`literature` 列的**原始出处截图**，便于逐格核对。全部由 `papers/` 中的论文
-PDF 直接渲染裁切，不含任何重绘。
+本目录存放 `../version1_comparison.csv`、`../version4_comparison.csv` 与
+`../china_comparison.csv` 中 `literature` 列的**原始出处截图**，便于逐格核对。
+全部由 `papers/` 中的论文 PDF 直接渲染裁切，不含任何重绘。
 
 ## 文件
 
@@ -13,6 +13,10 @@ PDF 直接渲染裁切，不含任何重绘。
 | `zartman_doe_1981_eq_17_19.png` | 同上，印刷页 147（PDF 第 14 页） | 造山带再分配公式 eq. 17–19（`run()` 的实现依据，见 [`../../../docs/theory.md`](../../../docs/theory.md) §2.5） |
 | `haines_zartman_1988_table_4_page1.png` | Haines & Zartman (1988) PLUMBO 报告 Table 4 第 1 页（PDF 第 21 页） | Version IV 终态质量与元素丰度 |
 | `haines_zartman_1988_table_4_page2.png` | 同上，Table 4 第 2 页（PDF 第 22 页） | **Version IV 对比表的 24 个目标值**（"ENDING ISOTOPIC RATIOS FOR THE MAJOR RESERVOIRS" 区块） |
+| `li_2001_table_1_2.png` | 李龙等 (2001) 印刷页 64（PDF 第 4 页） | 中国模型的**初始比值**（表 1）与**分配系数**（表 2） |
+| `li_2001_table_3.png` | 同上，同页（通栏） | **中国模型对比表的 99 个目标值**（表 3 生长曲线） |
+| `li_2001_table_4.png` | 同上，印刷页 65（PDF 第 5 页） | 中国模型对比表的 **6 个现今值**（表 4）；该表脚注"全球平均\*"引自 Zartman and Haines (1988)，**不是**校验目标 |
+| `li_2001_eq_3_6.png` | 同上，印刷页 63（PDF 第 3 页） | eqs. (3)–(6)：侵蚀求和、造山带质量、元素带入与再分配归一化 |
 
 ## 复现命令
 
@@ -21,8 +25,10 @@ pdftoppm -png -gray -r 220 -f <page> -l <page> papers/<paper>.pdf out   # popple
 # 再按页面内容自动裁掉白边（PIL：阈值 200 后取 getbbox，四周留 14 px）
 ```
 
-`papers/Zartman_Doe_1981_Plumbotectonics.pdf` 与
-`papers/Haines_Zartman_1988_PLUMBO.pdf` 均在仓库内，上述命令可完全复现。
+`papers/` 中四篇文献的 PDF 均在仓库内，上述命令可完全复现。
+
+> 李龙等 (2001) 的**表 3 通栏跨两列**，裁切时须用整页宽度，不能按单栏框取。
+> 该 PDF 的文本层字体映射已损坏（`pdftotext` 输出乱码），只能按图像核对。
 
 ## 核对提示（重要）
 
@@ -46,3 +52,9 @@ Lithosphere 列：207Pb/204Pb = 15.44）独立印证。
 
 Version I 的两张表未使用文本层转录（Table IV 由图像人工核对，且已由修正后的
 模型独立复算验证），不受此影响。
+
+李龙等 (2001) 的表 3 同样存在转录问题：其"全球平均\*"行注**据 Zartman and
+Haines (1988)**，但下地壳 `238U/204Pb` 印成 `6.94`，而该文献实为 `6.49`
+（数位颠倒）；三个 `Th/U` 也都与 Zartman & Haines 不符。该行不是校验目标，
+但说明**这篇论文的表格本身有转录错误**，见
+[`../../../docs/validation.md`](../../../docs/validation.md) §5.4。

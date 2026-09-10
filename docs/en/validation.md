@@ -290,12 +290,128 @@ papered over by tuning.
 > the text layer of a scanned PDF.** Version I's two tables were verified
 > against the image and recomputed independently, so they are unaffected.
 
-## 5. How to reproduce
+## 5. Li et al. (2001): China regional model
+
+Li Long, Zheng Yongfei and Zhou Jianbo (2001) built a regional model for
+continental China on the basis of the "plumbotectonic model".
+`src/plumbotectonics/china.py` implements its criterion as: **the algorithm
+follows Zartman & Doe (1981) (this repository's `version1`) and only replaces
+the two tables the paper prints itself**.
+
+### 5.1 Given by the paper vs inherited
+
+| Quantity | Value | Source |
+|---|---|---|
+| 4.0 Ga 206/207/208Pb ratios | 10.17 / 12.07 / 30.56 | paper Table 1 |
+| Partition ratios (mantle/lower crust/upper crust) | Pb 0.038/0.235/0.727, U 0.024/0.111/0.865, Th 0.021/0.162/0.817 | paper Table 2 |
+| Upper/lower crustal retention $p^u$, $p^l$ | 0.63, 0.95 (erosion 0.37, 0.05) | paper eq. (2) |
+| Enrichment factors | $E_m=4$, $E_u=E_l=1$ | paper eq. (5) |
+| Residual orogene returned to the mantle | 90 %, the other 10 % becomes upper-crust sediment | paper eqs. (7)(8), assumption (3d) |
+| Initial abundances 204Pb/238U/232Th | 38 / 349 / 1335 ($10^{15}$ mol) | **inherited from ZD1981 Table II** |
+| Masses mantle / new upper and lower crust | 800 / 2.6 / 2.6 ($10^{24}$ g) | **inherited from ZD1981 Table II** |
+| $k_i$, decay constants, 238U/235U | 1/8...1/128, 0.155125/0.98485/0.049475, 137.88 | **inherited from ZD1981** |
+
+The paper **does not give** the 4.0 Ga element abundances, nor the specific
+number in "the new upper and lower crust have equal mass" -- they can only be
+inherited. This implementation therefore has **zero free parameters**.
+
+### 5.2 Current accuracy
+
+| Data | max absolute difference | mean | RMSE | max relative |
+|---|---|---|---|---|
+| paper Table 3 (99 growth-curve values) | **0.6211** | 0.2199 | 0.2719 | 3.557 % |
+| paper Table 4 (6 present-day values) | **0.4715** | 0.1793 | 0.2353 | 4.300 % |
+
+Table 3 is printed to 0.01, and only **12/99** fall inside +-0.005. **Table 3 is
+not reproduced.**
+
+The qualitative features (on which the whole argument of the paper rests) do
+hold: upper crust 20.42 > mantle 17.49 > lower crust 17.25 (paper
+19.86 > 17.92 > 17.10).
+
+### 5.3 Why Table 3 cannot be reproduced
+
+**Inverting the initial values from Table 3** (three unknowns: $\mu_0$,
+$\kappa_0$, new-crustal mass $m$; Jacobian condition number 52, inter-parameter
+correlations <=0.46, so the inverse problem is well posed):
+
+| Data | $\mu_0$ | $\kappa_0$ | $m$ ($10^{24}$ g) |
+|---|---|---|---|
+| Table 3 only (99 values) | 17.346 +- 0.033 | 2.570 +- 0.019 | **15.15 +- 0.96** |
+| Table 4 only (6 values) | 16.674 +- 0.276 | 2.471 +- 0.036 | **1.28 +- 0.48** |
+| ZD1981 inherited values | 17.081 | 2.507 | 2.600 |
+
+Two conclusions:
+
+1. **The initial abundances are essentially right** -- the $\mu_0$ and
+   $\kappa_0$ inverted from Table 3 differ from ZD1981 by only 1.6 % and 2.5 %,
+   so "inherit the initial abundances from ZD1981" is defensible.
+2. **The two tables are mutually incompatible** -- Table 3 demands
+   $m \approx 15.15 \pm 0.96$ while Table 4 demands $1.28 \pm 0.48$, **about
+   13 sigma apart**. One single parameter set cannot produce both tables.
+
+Even freeing all three parameters in a fit only pushes the worst Table 3
+deviation down to 0.29 (with Table 4 blowing up to 1.96), which shows that the
+residual deviation is **structural**, not a calibration problem.
+
+### 5.4 Internal inconsistencies in the paper (5 located)
+
+| # | Location | What it says | Evidence |
+|---|---|---|---|
+| 1 | eq. (3) | prints `Σ p^j` (j=1..i-1) where `p^(j-1)` is required | read literally, the present-day upper-crust 238U/204Pb of Table 4 comes out 9.76, whereas the paper prints 14.98 |
+| 2 | $p^l$ | printed as 0.95 | fitting with 0.95 is worse than with ZD1981's 0.90 |
+| 3 | $E_m$ in eq. (5) | says only "entering the orogene", not how much the mantle loses | if it also acted on the mantle loss, the Table 4 deviation would rise from 0.47 to 0.78 |
+| 4 | Table 4 footnote | lower crust 6.94 | Zartman & Haines (1988) actually give 6.49, a **digit transposition** |
+| 5 | body text vs Table 4 footnote | the text compares against Zartman and Doe (1981), the footnote cites Z&H (1988) | the values (10.01, 11.08) are digit-for-digit Z&H's version IV; and only against Z&H does the "Th-rich" claim hold (3.60 vs 2.73; against ZD1981's 3.57 the difference is only 0.03) |
+
+### 5.5 Two physics bugs fixed during development
+
+Both used to give **better-looking but wrong** accuracy; they are recorded here
+so they are not repeated:
+
+| Bug | Symptom | Fix |
+|---|---|---|
+| **the residual 10 % of the orogene was discarded** | final total mass of the system 780.2 (initial 800), violating mass conservation | the paper says it "remains at the crustal edge ... becomes sedimentary rock", so it enters the **upper crust** as its own layer. After the fix the total mass is 800.0 |
+| **$E_m$ applied to the orogene gain only** | the mantle lost only $f_m N_m$ while the orogene received $f_m E_m N_m$, so the whole system's Pb/U/Th **doubled every run** (final/initial = 1.96 / 1.93 / 1.91) | the mantle loss must carry $E_m$: the extracted material has a concentration $E_m$ times its own, so its element content is $= f_m M \times E_m (N/M) = f_m E_m N$. After the fix, $E_m$ on the loss and $E_m$ on the gain only conserve all **six nuclides** exactly |
+
+> Lesson: **goodness of fit must not be used to choose between physical
+> assumptions.** The two wrong configurations above gave Table 4 deviations of
+> 0.097 and 0.285, both better than the correct configuration's 0.472 -- but
+> they were bought by breaking conservation. The conservation checks are
+> `tests/test_china.py::test_element_inventory_is_conserved` and
+> `::test_the_mass_of_the_system_is_constant`.
+
+### 5.6 Two switchable physical conventions
+
+| Switch | Default | Alternative | Notes |
+|---|---|---|---|
+| `decay_parents` | `False` (ZD1981: constant parents, $\Delta d = e^{\lambda t}-e^{\lambda t'}$, 207 fed by 238U/137.88) | `True` (paper eqs. 9-10: parents really decay, 235U tracked separately, 4.0 Ga 238U/235U = 4.9897) | **the two are equivalent digit for digit** (maximum difference $2.1\times10^{-14}$), because "constant + 349/1335" and "decaying + back-calculated 649/1627" are the same thing |
+| `melt_model` | `"zd1981"` ($E_m$ fixed at 4) | `"batch"` ($E=1/f_m$) | the paper says $E_m=4$ corresponds to "25 % melting", while $f_m$ falls from 1/8 to 1/128 -- the two are inconsistent; under batch melting a perfectly incompatible element should have $E=1/f_m$ (8...128). Measured, batch is actually worse (Table 3 max 1.18), so the default keeps the paper's convention |
+
+### 5.7 Known limitations (of the framework itself, not implementation bugs)
+
+- **Pb is treated as a refractory element**: it is separated from U and Th only
+  by the partition ratios, with no distinction between its behaviour in partial
+  melting and in orogene differentiation (Pb is moderately volatile).
+- **The mantle is a single well-mixed reservoir**: implicitly homogenised by
+  convection within the 0.4 Ga interval.
+- **The orogene homogenises instantaneously**: this is the paper's assumption
+  (3a), not an implementation choice.
+
+### 5.8 Reproduction
+
+```bash
+uv run python scripts/run_china.py     # print growth curves and comparison statistics, write outputs/results/china_comparison.csv
+uv run pytest -q tests/test_china.py   # 11 tests
+```
+
+## 6. How to reproduce
 
 ```bash
 uv sync --extra dev
 uv run pytest -q
 uv run python scripts/run_version4.py
+uv run python scripts/run_china.py
 ```
 
 Or without installing anything, and without pandas:
@@ -319,7 +435,7 @@ for name, target in TARGETS.items():
     print(name, max(abs(g - t) for g, t in zip(got, target)))
 ```
 
-## 6. References
+## 7. References
 
 1. Haines, S. M., & Zartman, R. E. (1988). PLUMBO; a Hewlett-Packard Series 200 BASIC language program for version IV of plumbotectonics. In *Open-File Report* (Nos. 88–269). U.S. Geological Survey. https://doi.org/10.3133/ofr88269
 2. Zartman, R. E., & Doe, B. R. (1981). Plumbotectonics—The model. *Tectonophysics*, *75*(1–2), 135–162. https://doi.org/10.1016/0040-1951(81)90213-4

@@ -11,12 +11,12 @@ the scope of the guarantee. The raw validation data is in
 
 | Layer | Mechanism | Artefacts |
 |---|---|---|
-| 1. Baseline | compare against the printed values of the papers | `tests/test_version1.py`, `tests/test_version4.py` |
-| 2. Invariants | conservation laws and structural constraints | `tests/test_conservation.py` |
+| 1. Baseline | compare against the printed values of the papers | `tests/test_version1.py`, `tests/test_version4.py`, `tests/test_china.py` |
+| 2. Invariants | conservation laws and structural constraints | `tests/test_conservation.py`, `tests/test_china.py` |
 | 3. Regression | rerun 1+2 on every change | `pytest` (includes the figure layout and PDF-timestamp checks in `tests/test_plotting.py`) |
 
 Only when all three pass is a result considered "correct under the model
-definition". Current status: **22/22 passing**.
+definition". Current status: **33/33 passing**.
 
 ## 2. Layer 1: baseline validation
 
@@ -47,17 +47,37 @@ Full comparison in [`validation.md`](validation.md) section 2.
 > ratios as direct fractions; the fix is recorded in
 > [`validation.md`](validation.md) section 2.1.
 
+### 2.3 China model -> Li et al. (2001), Tables 3 and 4
+
+| Data | Items | max absolute difference | mean | RMSE | Criterion |
+|---|---|---|---|---|---|
+| paper Table 4 (present-day `238U/204Pb`, `Th/U`) | 6 | 0.4715 | 0.1793 | 0.2353 | `abs < 0.5` / `abs < 0.10` (`Th/U`) |
+| paper Table 3 (growth curves) | 99 | 0.6211 | 0.2199 | 0.2719 | **not reproduced**, pinned only by the regression ceilings 0.65 / 0.25 |
+
+The model has **zero free parameters**: the initial abundances, the new-crustal
+mass, $k_i$ and the decay constants that the paper does not print are all
+inherited from Zartman & Doe (1981).
+
+> **Table 3 is explicitly listed as not reproduced**, because the paper's two
+> result tables contradict each other: inverting Table 3 gives a new-crustal
+> mass of $15.15 \pm 0.96$ against $1.28 \pm 0.48$ from Table 4, about 13 sigma
+> apart. `tests/test_china.py` therefore does not assert "reproduction" but
+> pins deviation ceilings, so that the fit cannot quietly degrade later. The
+> full analysis and the paper's five internal inconsistencies are in
+> [`validation.md`](validation.md) section 5.
+
 ## 3. Layer 2: invariants
 
 ### 3.1 Mass conservation (exact, the strongest regression signal)
 
-Both models only extract, mix and redistribute material, so mass is neither
-created nor destroyed:
+All three models only extract, mix and redistribute material, so mass is
+neither created nor destroyed:
 
 | Model | Initial mass | Measured final | Deviation |
 |---|---|---|---|
 | Version I | 800.0 | 800.000000000 | 0 |
 | Version IV | 1050.0 | 1050.000000000 | 0 |
+| China model | 800.0 | 800.000000000 | 0 |
 
 Version IV final reservoirs ($10^{24}$ g):
 
@@ -68,13 +88,36 @@ Version IV final reservoirs ($10^{24}$ g):
 A single wrong partition coefficient breaks this identity immediately, which
 makes it more sensitive than "the ratios look close to the paper".
 
+The China model has one finer layer of element conservation as well: after 11
+orogenies the **total mole numbers** of 204Pb, 238U and 232Th deviate by **0**
+relative to their initial values (asserted inside `run()` when `strict=True`,
+raising `AssertionError` beyond the bound). Under `decay_parents=True` it is
+instead the "daughter + parent" sums that are conserved (206Pb + 238U, etc.),
+because the parents themselves decay to today's 349.
+
+> This invariant caught two real bugs: the 10 % of the residual orogene that
+> does not return to the mantle used to be discarded, dropping the total mass of
+> the system from 800 to 780.2. By the paper's assumption (3d) it should become
+> upper-crust sediment, and the fix restores 800.000000000. It also caught
+> another one: if $E_m$ acted on the orogene gain only and not on the mantle
+> loss, the whole system's elements doubled every run (final/initial
+> 1.96 / 1.93 / 1.91). See [`validation.md`](validation.md) section 5.5.
+
 ### 3.2 Structural invariants
 
 - Version I adds exactly one upper and one lower segment per cycle (11 + 11);
 - all Version I segment masses and isotope mole numbers stay positive;
 - Version IV `history` has exactly 46 entries, `cycle` 1-46, time 4.4 -> 0.0 Ga;
 - Version IV `total[h] == mantle[h] + upper[h] + lower[h] + sub[h]` (h = 1..6);
-- Version IV mantle `206Pb/204Pb` increases monotonically with geological time.
+- Version IV mantle `206Pb/204Pb` increases monotonically with geological time;
+- the China model adds exactly one upper-crust layer, one sediment layer (the
+  10 % residual orogene) and one lower-crust layer per cycle, i.e. 11 x 3
+  upper-side layers and 11 lower-side layers;
+- the China model's present-day `238U/204Pb` over mantle, upper and lower crust
+  satisfies upper crust > mantle > lower crust, and `206Pb/204Pb` follows the
+  same order -- this is the premise of all the paper's source-discrimination
+  argument, and reversing the order would invalidate the interpretation of the
+  paper's Figures 2 and 3.
 
 ## 4. Total moles are **not** conserved (by design)
 
@@ -124,8 +167,8 @@ cannot propagate:
 `tests/test_conservation.py` covers both `FNEmoles` guards and the zero
 denominator branches of `ratios`.
 
-**Measured floating-point accuracy** (both models carry their state in NumPy
-arrays and use `np.exp` for the decay):
+**Measured floating-point accuracy** (all three models carry their state in
+NumPy arrays and use `np.exp` for the decay):
 
 | Item | Measured |
 |---|---|
@@ -149,10 +192,10 @@ to the pre-migration ones.
 
 ## 6. Reproducibility
 
-- **Dependency boundary**: both models use **NumPy** only (`version1.py` and
-  `version4.py` both `import numpy as np`); they no longer need `math`, and read
-  no external data files; `pandas` serves the comparison statistics in
-  `scripts/` and `matplotlib` only the plotting;
+- **Dependency boundary**: all three models use **NumPy** only (`version1.py`,
+  `version4.py` and `china.py` all `import numpy as np`); they no longer need
+  `math`, and read no external data files; `pandas` serves the comparison
+  statistics in `scripts/` and `matplotlib` only the plotting;
 - **Fully deterministic**: no random numbers, no timestamps, no
   order-dependent parallel reductions; `plotting.py` explicitly clears the
   `CreationDate` PDF metadata entry, which matplotlib would otherwise populate
@@ -237,6 +280,8 @@ jobs:
 1. Haines, S. M., & Zartman, R. E. (1988). PLUMBO; a Hewlett-Packard Series 200 BASIC language program for version IV of plumbotectonics. In *Open-File Report* (Nos. 88–269). U.S. Geological Survey. https://doi.org/10.3133/ofr88269
 2. Zartman, R. E., & Doe, B. R. (1981). Plumbotectonics—The model. *Tectonophysics*, *75*(1–2), 135–162. https://doi.org/10.1016/0040-1951(81)90213-4
 3. Zartman, R. E., & Haines, S. M. (1988). The plumbotectonic model for Pb isotopic systematics among major terrestrial reservoirs—A case for bi-directional transport. *Geochimica et Cosmochimica Acta*, *52*(6), 1327–1339. https://doi.org/10.1016/0016-7037(88)90204-9
+4. Li, L., Zheng, Y., & Zhou, J. (2001). Dynamic model for Pb isotope evolution in the continental crust of China. *Acta Petrologica Sinica*, *17*(1), 61–68.
 
 The baseline target (Table 4) comes from reference 1, Version I is defined by
-reference 2, and the gates follow reference 3.
+reference 2, the gates follow reference 3, and the source and validation targets
+(Tables 3 and 4) of the China regional model come from reference 4.

@@ -24,8 +24,8 @@
 | `V4_MASS0` ... `V4_CYCLES` | see file | Version IV initial conditions and switches |
 
 > Note: `version1.py` and `version4.py` currently hard-code their own copies of
-> these values, so editing `constants.py` does not affect either model (see
-> [`validation.md`](validation.md) section 4.2).
+> these values, so editing `constants.py` does not affect any of the three
+> models (see [`validation.md`](validation.md) section 4.2).
 
 ## `plumbotectonics.version1`
 
@@ -141,6 +141,66 @@ mask with `np.divide(..., where=...)` -- the same values, and no
 `INIT_RATIOS`, `ISO`, `A1`, `A4`, `A5`, `A6`, `U`, `L`, `S`, `E_a2`, `F_a3`,
 `E_b1`, `E_b2`, `E_b3`, `F_c3`, `E_up`, `E_low`, `E_sub` (`A*`, `U`, `L`, `S`
 and the `E_*` arrays are now `np.ndarray`; indexing is unchanged).
+
+## `plumbotectonics.china`
+
+The Li et al. (2001) China continental regional model. The algorithm follows
+Zartman & Doe (1981) (i.e. `version1`) and only replaces the paper's Table 1 and
+Table 2, changes the lower-crust retention to $p^l=0.95$ and returns 90 % of the
+residual orogene to the mantle. **Zero free parameters** (everything not given
+by the paper is inherited from ZD1981).
+
+### `run(decay_parents=False, melt_model="zd1981", strict=True)`
+
+| Parameter | Default | Meaning |
+|---|---|---|
+| `decay_parents` | `False` | `False` = ZD1981 constant parents; `True` = the paper's eqs. (9)(10), parents really decay (235U tracked separately). **The two are equivalent digit for digit** |
+| `melt_model` | `"zd1981"` | `"zd1981"` = $E_m$ fixed at 4; `"batch"` = batch melting $E=1/f_m$ |
+| `strict` | `True` | assert element-inventory conservation at the end, raising `AssertionError` on violation |
+
+Returns `(history, mantle, upper_segs, lower_segs)`:
+
+- `history`: 11 dicts keyed `t`, `mantle`, `orogene`, `upper`, `lower`; the
+  first three reservoirs hold `{'206/204', '207/204', '208/204'}` and
+  **`upper`/`lower` are `None` at t=4.0 Ga** (there is no crust before that
+  orogeny);
+- `mantle`: dict holding `mass` and the `ISO_KEYS` entries;
+- `upper_segs` / `lower_segs`: list of dict, one per layer (including the 10 %
+  sediment layer, counted as upper crust).
+
+### `present_day(mantle, upper_segs, lower_segs)`
+
+Returns `{'mantle'|'upper'|'lower': {'238U/204Pb': float, 'Th/U': float}}`,
+i.e. the two quantities of the paper's Table 4.
+
+### `check_conservation(mantle, upper, lower, decay_parents=False, rtol=1e-9)`
+
+Checks the element inventory. With `decay_parents=False` it checks 204Pb, 238U
+and 232Th; with `True` it checks 204Pb and the three "daughter + parent" sums
+(238U itself decays to today's 349 and is no longer conserved). Returns a dict of
+relative deviations and raises `AssertionError` when a bound is exceeded.
+
+### `e_mantle(f_m, melt_model="zd1981")`
+
+Enrichment factor of the material contributed by the mantle: `"zd1981"` returns
+4; `"batch"` returns $1/f_m$; any other value raises `ValueError`.
+
+### `ratios(res)` / `row_to_dict(row, mass)`
+
+Same semantics as the functions of the same name in `version1`.
+
+### Module constants
+
+| Constant | Value | Source |
+|---|---|---|
+| `R2060`/`R2070`/`R2080` | 10.17 / 12.07 / 30.56 | paper Table 1 |
+| `F_PB`/`F_U`/`F_TH` | (0.038, 0.727, 0.235) / (0.024, 0.865, 0.111) / (0.021, 0.817, 0.162) | paper Table 2, converted to the ZD1981 (mantle, upper, lower) column order |
+| `P_UPPER`/`P_LOWER` | 0.63 / 0.95 | paper eq. (2) |
+| `E_M`/`E_U`/`E_L` | 4.0 / 1.0 / 1.0 | paper eq. (5) |
+| `RETURN` | 0.9 | paper eqs. (7)(8) |
+| `PB2040`/`U2380`/`TH2320` | 38 / 349 / 1335 | ZD1981 Table II (inherited) |
+| `MASS0`/`NEW_U`/`NEW_L` | 800 / 2.6 / 2.6 | ZD1981 Table II (inherited) |
+| `ISO_KEYS` | `("204","206","207","208","232","238","235")` | one 235U more than `version1` |
 
 ## `plumbotectonics.plotting`
 
