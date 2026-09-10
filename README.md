@@ -1,52 +1,46 @@
 # Plumbotectonics
 
-Python implementation and validation of the plumbotectonics lead-isotope
-models of Zartman & Doe (1981) and Haines & Zartman (1988).
+Zartman & Doe (1981) 与 Haines & Zartman (1988) 铅同位素演化模型的
+Python 实现与校验。
 
-Plumbotectonics is a family of mass-balance models that track Pb, U and Th
-through Earth's major reservoirs (mantle, upper and lower crust, subcrustal
-lithosphere, mid-ocean ridge) over discrete orogenic cycles. Each cycle
-extracts material from the mantle and existing crust, homogenizes it in an
-orogene, and redistributes it among the reservoirs; between cycles only
-radioactive decay occurs.
+Plumbotectonics 是一类质量平衡模型：把地球浅部划分为若干长期存在的储库
+（地幔、上/下地壳、次地壳岩石圈、洋中脊），用离散的造山旋回描述储库之间
+的物质与同位素交换。每个旋回从地幔和已有地壳中取出物质，在造山带内混合
+均一化，再重新分配到各储库；两次旋回之间只发生放射性衰变。
 
-> 中文文档见 [`docs/`](docs/)：计算原理、用法、API 与校验数据。
+## 特性
 
-## Features
+- 纯 Python 实现 **Version I**（Zartman & Doe, 1981）与
+  **Version IV / PLUMBO**（Haines & Zartman, 1988）两个模型；
+- 复现 Haines & Zartman (1988) Table 4 的全部 24 个现今值
+  （最差绝对偏差 **0.00993**，测试容差 0.02）；
+- 内置两版本的生长曲线绘图（600 dpi PNG + 矢量 PDF）。
 
-- Pure-Python implementations of **Version I** (Zartman & Doe, 1981) and
-  **Version IV / PLUMBO** (Haines & Zartman, 1988).
-- Reproduces the ending values of Haines & Zartman (1988), Table 4
-  (worst absolute deviation **0.00993**, test tolerance 0.02).
-- Publication-style growth-curve figures for both models.
+## 模型
 
-## Models
-
-| Module | Model | Reference |
+| 模块 | 模型 | 文献 |
 |---|---|---|
 | `plumbotectonics.version1` | Version I | Zartman & Doe (1981) |
 | `plumbotectonics.version4` | PLUMBO version IV | Haines & Zartman (1988) |
 
-Version I uses a two-reservoir (mantle + crust) mass balance with fixed
-partition coefficients. Version IV (PLUMBO) adds the MOR reservoir, the
-subcrustal lithosphere, a three-component orogene (distal / proximal / wedge)
-and explicit mass-exchange gates.
+Version I 是"地幔 + 地壳"的两储库质量平衡，使用固定的分配系数；
+Version IV（PLUMBO）增加了洋中脊（MOR）储库、次地壳岩石圈、造山带的三组分
+结构（远端 / 近端 / 楔形）以及显式的物质交换"门"（gates）。
 
-## Install
+## 安装
 
 ```bash
 pip install -e .
-# or
+# 或
 uv pip install -e .
 ```
 
-Requires Python >= 3.10 (`numpy`, `pandas`, `matplotlib`).
+要求 Python >= 3.10，依赖 `numpy`、`pandas`、`matplotlib`。
 
-If you prefer not to install, run from the repository root with `src` on the
-path:
+不想安装时，把 `src` 加入 `PYTHONPATH` 即可：
 
 ```bash
-# bash
+# bash / Git Bash
 PYTHONPATH=src python scripts/run_version1.py
 ```
 
@@ -56,88 +50,85 @@ $env:PYTHONPATH = "src"
 python scripts\run_version1.py
 ```
 
-## Run
+## 运行
 
 ```bash
-python scripts/run_version1.py        # Version I growth history (stdout)
-python scripts/run_version4.py        # Table 4 comparison -> outputs/results/
-python scripts/plot_growth_curves.py  # figures -> outputs/figures/
+python scripts/run_version1.py        # Version I 生长史（打印到终端）
+python scripts/run_version4.py        # 与 Table 4 对比 -> outputs/results/
+python scripts/plot_growth_curves.py  # 生长曲线图 -> outputs/figures/
 ```
 
-Generated tables and figures are written to `outputs/`.
+生成的表格与图形写入 `outputs/`。
 
-## Documentation
+## 文档
 
-| Document | Contents |
+| 文档 | 内容 |
 |---|---|
 | [`docs/theory.md`](docs/theory.md) | 计算原理：两版本的质量/同位素传输、分配函数与衰变 |
 | [`docs/usage.md`](docs/usage.md) | 安装、命令行、Python API 与故障排查 |
-| [`docs/api.md`](docs/api.md) | 模块、函数、返回数据结构参考 |
+| [`docs/api.md`](docs/api.md) | 模块、函数、参数与返回数据结构 |
 | [`docs/validation.md`](docs/validation.md) | Table 4 校验数据、标定说明与已知问题 |
 | [`docs/correctness.md`](docs/correctness.md) | 结果正确性保证：三层保证体系、守恒不变量、CI |
 
-## Layout
+## 目录结构
 
-- `src/plumbotectonics/` - model implementations (`constants.py`,
-  `version1.py`, `version4.py`, `plotting.py`)
-- `scripts/` - command-line entry points
-- `tests/` - pytest validation suite
-- `papers/` - source papers
-- `outputs/` - generated tables and figures
-- `docs/` - documentation
+- `src/plumbotectonics/` — 模型实现（`constants.py`、`version1.py`、
+  `version4.py`、`plotting.py`）
+- `scripts/` — 命令行入口
+- `tests/` — pytest 校验套件
+- `papers/` — 原始论文
+- `outputs/` — 生成的表格与图形
+- `docs/` — 文档
 
-## Tests
+## 测试
 
 ```bash
 pytest
 ```
 
-The suite checks the initial and present-day mantle ratios for Version I and
-all four reservoirs of Version IV against Table 4 (`abs(diff) < 0.02`), and the
-mass-conservation invariants of both models (`tests/test_conservation.py`).
+覆盖范围：Version I 的初始与现今地幔比值、Version IV 四个储库对 Table 4 的
+24 项比对（`abs(diff) < 0.02`）、两个模型的质量守恒与结构不变量
+（`tests/test_conservation.py`）。当前状态：**12/12 通过**。
 
-## Validation
+## 校验
 
-The version IV implementation is calibrated against the ending values printed
-in Haines & Zartman (1988), Table 4. The lower-crust `238U/204Pb` value used
-for validation is the self-consistent value **6.4903** (not the inconsistent
-6.1903 printed in some copies of the table).
+Version IV 以 Haines & Zartman (1988) Table 4 的现今值为标定目标。lower 库
+用于校验的 `238U/204Pb` 取自洽值 **6.4903**（部分版本印作 6.1903，与同行其它
+数值不自洽）。
 
-Measured worst deviation from Table 4 (`dp=0.14`, 46 cycles):
+`dp=0.14`、46 个旋回下与 Table 4 的最差偏差：
 
-| Reservoir | worst `abs(diff)` | ratio |
+| 储库 | 最差 `abs(diff)` | 对应比值 |
 |---|---|---|
-| mantle | 0.00049 | 208Pb/204Pb |
-| upper crust | 0.00017 | 207Pb/204Pb |
-| lower crust | 0.00033 | 232Th/204Pb |
-| subcrustal | 0.00993 | 232Th/204Pb |
+| 地幔 | 0.00049 | 208Pb/204Pb |
+| 上地壳 | 0.00017 | 207Pb/204Pb |
+| 下地壳 | 0.00033 | 232Th/204Pb |
+| 次地壳 | 0.00993 | 232Th/204Pb |
 
-See [`docs/validation.md`](docs/validation.md) for the full table.
+完整对照表见 [`docs/validation.md`](docs/validation.md)。
 
-## Correctness guarantees
+## 正确性保证
 
-Results are pinned by three independent layers; see
-[`docs/correctness.md`](docs/correctness.md) for the full argument.
+结果由三层相互独立的机制固定，详见
+[`docs/correctness.md`](docs/correctness.md)：
 
-1. **Baseline validation** - Version IV reproduces all 24 ending values of
-   Haines & Zartman (1988), Table 4 (`abs(diff) < 0.02`); Version I matches the
-   initial and present-day mantle ratios of Zartman & Doe (1981).
-2. **Invariants** - total mass is conserved exactly in both models
-   (Version I: 800; Version IV: 1050), pinned by
-   `tests/test_conservation.py` together with structural checks.
-3. **Regression tests** - `pytest` reruns both layers on every change.
+1. **基准校验** — Version IV 复现 Haines & Zartman (1988) Table 4 全部 24 个
+   现今值（`abs(diff) < 0.02`）；Version I 与 Zartman & Doe (1981) 的初始及
+   现今地幔比值一致。
+2. **不变量** — 两个模型的总质量精确守恒（Version I：800；
+   Version IV：1050），由 `tests/test_conservation.py` 连同结构约束一并校验。
+3. **回归测试** — 每次改动由 `pytest` 重跑上述两层。
 
-> Total *mole* numbers are **not** conserved, by design: the published models
-> hold the parent isotopes (238U, 232Th) constant across each decay interval,
-> so Pb grows without depleting them. That is a modelling convention, not an
-> implementation bug - see [`docs/correctness.md`](docs/correctness.md) section 4.
+> 总**摩尔数**并不守恒，这是模型的有意约定：论文模型在每个衰变区间内把母体
+> （238U、232Th）当作常数，Pb 因此增长而母体不减。这是建模约定而非实现缺陷，
+> 详见 [`docs/correctness.md`](docs/correctness.md) 第 4 节。
 
-## References
+## 参考文献
 
 - Zartman, R. E., and Doe, B. R., 1981, *Plumbotectonics-the model*:
   Tectonophysics, 75, 135-162.
 - Haines, S. M., and Zartman, R. E., 1988, *PLUMBO: A Hewlett-Packard Series
-  200 BASIC language program for version IV of plumbotectonics*: U.S.
-  Geological Survey Open-File Report 88-269.
+  200 BASIC language program for version IV of plumbotectonics*:
+  U.S. Geological Survey Open-File Report 88-269.
 
-Both papers are stored in `papers/`.
+两篇论文存放在 `papers/`。
