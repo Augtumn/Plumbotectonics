@@ -13,10 +13,10 @@ the scope of the guarantee. The raw validation data is in
 |---|---|---|
 | 1. Baseline | compare against the printed values of the papers | `tests/test_version1.py`, `tests/test_version4.py` |
 | 2. Invariants | conservation laws and structural constraints | `tests/test_conservation.py` |
-| 3. Regression | rerun 1+2 on every change | `pytest` |
+| 3. Regression | rerun 1+2 on every change | `pytest` (includes the figure layout check in `tests/test_plotting.py`) |
 
 Only when all three pass is a result considered "correct under the model
-definition". Current status: **12/12 passing**.
+definition". Current status: **14/14 passing**.
 
 ## 2. Layer 1: baseline validation
 

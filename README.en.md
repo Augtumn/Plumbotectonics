@@ -89,7 +89,7 @@ uv run pytest
 Coverage: the initial and present-day mantle ratios of Version I, the 24
 Table 4 ratios of the four Version IV reservoirs (`abs(diff) < 0.02`), and the
 mass-conservation and structural invariants of both models
-(`tests/test_conservation.py`). Current status: **12/12 passing**.
+(`tests/test_conservation.py`) plus the figure layout (`tests/test_plotting.py`). Current status: **14/14 passing**.
 
 ## Validation
 

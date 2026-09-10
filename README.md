@@ -80,7 +80,7 @@ uv run pytest
 
 覆盖范围：Version I 的初始与现今地幔比值、Version IV 四个储库对 Table 4 的
 24 项比对（`abs(diff) < 0.02`）、两个模型的质量守恒与结构不变量
-（`tests/test_conservation.py`）。当前状态：**12/12 通过**。
+（`tests/test_conservation.py`）以及图形布局（标题不得与面板标题重叠，`tests/test_plotting.py`）。当前状态：**14/14 通过**。
 
 ## 校验
 

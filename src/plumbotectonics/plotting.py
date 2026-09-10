@@ -54,7 +54,7 @@ def _extract_version4_series(history: list[dict[str, Any]]) -> dict[str, dict[st
 
 
 def plot_version4_growth_curves(result: dict[str, Any], out_png: str, out_pdf: str | None = None) -> None:
-    """Plot version IV growth curves for mantle/upper/lower/sub/orogene."""
+    """Plot version IV growth curves; returns the closed figure."""
     hist = result["history"]
     series = _extract_version4_series(hist)
 
@@ -112,17 +112,18 @@ def plot_version4_growth_curves(result: dict[str, Any], out_png: str, out_pdf: s
     ax.grid(alpha=0.3)
     ax.legend(fontsize=9)
 
-    fig.suptitle("PLUMBO version IV growth curves (calibrated parameters)", fontsize=15, y=1.02)
+    fig.suptitle("PLUMBO version IV growth curves (calibrated parameters)", fontsize=15)
     os.makedirs(os.path.dirname(os.path.abspath(out_png)), exist_ok=True)
     fig.savefig(out_png, dpi=600, bbox_inches="tight")
     if out_pdf:
         os.makedirs(os.path.dirname(os.path.abspath(out_pdf)), exist_ok=True)
         fig.savefig(out_pdf, bbox_inches="tight")
     plt.close(fig)
+    return fig
 
 
 def plot_version1_growth_curves(history: list[dict[str, Any]], out_png: str, out_pdf: str | None = None) -> None:
-    """Plot version I growth curves for mantle/orogene/upper/lower."""
+    """Plot version I growth curves; returns the closed figure."""
     names = ["mantle", "orogene", "upper", "lower"]
     labels = {"mantle": "Mantle", "orogene": "Orogene", "upper": "Upper crust", "lower": "Lower crust"}
     colors = {"mantle": "#1f77b4", "orogene": "#ff7f0e", "upper": "#d62728", "lower": "#2ca02c"}
@@ -178,10 +179,11 @@ def plot_version1_growth_curves(history: list[dict[str, Any]], out_png: str, out
     ax.grid(alpha=0.3)
     ax.legend(fontsize=8)
 
-    fig.suptitle("Zartman & Doe (1981) version I growth curves", fontsize=15, y=1.02)
+    fig.suptitle("Zartman & Doe (1981) version I growth curves", fontsize=15)
     os.makedirs(os.path.dirname(os.path.abspath(out_png)), exist_ok=True)
     fig.savefig(out_png, dpi=600, bbox_inches="tight")
     if out_pdf:
         os.makedirs(os.path.dirname(os.path.abspath(out_pdf)), exist_ok=True)
         fig.savefig(out_pdf, bbox_inches="tight")
     plt.close(fig)
+    return fig
