@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Run the Zartman & Doe (1981) version I model and print the growth history."""
+"""Run the Zartman & Doe (1981) Version I model and print the growth history."""
 from plumbotectonics.version1 import run
 
 if __name__ == "__main__":

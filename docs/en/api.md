@@ -110,7 +110,7 @@ A zero denominator gives `None`.
 
 ### `FNEmoles(N, Mass1, Mass2, Bias)`
 
-The PLUMBO mole-split function (see [`theory.md`](theory.md) section 3.6).
+The Version IV mole-split function (see [`theory.md`](theory.md) section 3.6).
 Returns `0.0` when `Bias <= 0` or `Mass1*Bang + Mass2*(1-Bang) == 0`.
 
 ### Module constants and arrays

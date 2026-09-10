@@ -108,7 +108,7 @@
 
 ### `FNEmoles(N, Mass1, Mass2, Bias)`
 
-PLUMBO 的摩尔分配函数（见 [`theory.md`](theory.md) §3.6）。
+Version IV 的摩尔分配函数（见 [`theory.md`](theory.md) §3.6）。
 `Bias <= 0` 或 `Mass1*Bang + Mass2*(1-Bang) == 0` 时返回 `0.0`。
 
 ### 模块常量与数组

@@ -2,7 +2,7 @@
 
 > [English](en/theory.md) | **简体中文**
 
-本文档说明本仓库中两个模型（Version I 与 Version IV / PLUMBO）的计算流程，
+本文档说明本仓库中两个模型（Version I 与 Version IV）的计算流程，
 与 `src/plumbotectonics/version1.py`、`version4.py` 的实现逐行对应。
 
 ## 1. 总体框架
@@ -173,9 +173,9 @@ $$
 
 ---
 
-## 3. Version IV：PLUMBO / Haines & Zartman (1988)
+## 3. Version IV：Haines & Zartman (1988)
 
-> 本章描述 PLUMBO 的实现（Haines & Zartman, 1988）。造山带三分量与双向物质交换（bi-directional transport，即 §3.5 的 gates）的物理依据另见 Zartman & Haines (1988)。
+> 本章描述 Version IV 的实现（Haines & Zartman, 1988）。造山带三分量与双向物质交换（bi-directional transport，即 §3.5 的 gates）的物理依据另见 Zartman & Haines (1988)。
 
 实现：`plumbotectonics.version4.run()`
 

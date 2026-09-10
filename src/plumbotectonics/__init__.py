@@ -3,8 +3,8 @@
 
 This package contains:
 
-- ``version1``: the Zartman & Doe (1981) version I model.
-- ``version4``: the Haines & Zartman (1988) PLUMBO version IV model.
+- ``version1``: the Zartman & Doe (1981) Version I model.
+- ``version4``: the Haines & Zartman (1988) Version IV model.
 - ``plotting``: publication-style growth-curve plots.
 """
 

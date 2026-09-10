@@ -1,6 +1,6 @@
 # Initial Pb isotope ratios are defined below the module docstring.
 # -*- coding: utf-8 -*-
-"""PLUMBO version IV model (Haines & Zartman, 1988).
+"""Version IV plumbotectonics model (Haines & Zartman, 1988).
 
 References:
     Haines, S. M., & Zartman, R. E. (1988). PLUMBO; a Hewlett-Packard Series

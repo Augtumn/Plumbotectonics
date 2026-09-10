@@ -83,7 +83,7 @@ $$
 while $^{238}\mathrm{U}$ itself is not depleted; 207 and 208 behave the same.
 Pb therefore appears "out of nothing" on the books and total moles must rise.
 
-This is a **modelling convention of Zartman & Doe / PLUMBO**, not an
+This is a **modelling convention of Version I and Version IV**, not an
 implementation error:
 
 - mass conservation still holds (mass and moles are two separate ledgers);

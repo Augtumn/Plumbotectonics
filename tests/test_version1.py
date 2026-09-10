@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Validation tests for the version I model."""
+"""Validation tests for the Version I model."""
 from plumbotectonics.version1 import run
 
 

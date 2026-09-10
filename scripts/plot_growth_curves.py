@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Generate version I and version IV growth-curve figures."""
+"""Generate Version I and Version IV growth-curve figures."""
 import os
 from plumbotectonics.version1 import run as run_v1
 from plumbotectonics.version4 import run as run_v4

@@ -16,7 +16,7 @@ occurs.
 ## Features
 
 - Pure-Python implementations of **Version I** (Zartman & Doe, 1981) and
-  **Version IV / PLUMBO** (Haines & Zartman, 1988);
+  **Version IV** (Haines & Zartman, 1988);
 - Reproduces all 24 present-day values of Haines & Zartman (1988), Table 4
   (worst absolute deviation **0.00993**, test tolerance 0.02);
 - Publication-style growth curves for both models (600 dpi PNG + vector PDF).
@@ -29,7 +29,7 @@ occurs.
 | `plumbotectonics.version4` | Version IV | Haines & Zartman (1988) |
 
 Version I is a two-reservoir (mantle + crust) mass balance with fixed
-partition coefficients. Version IV (PLUMBO) adds the mid-ocean-ridge (MOR)
+partition coefficients. Version IV adds the mid-ocean-ridge (MOR)
 reservoir, the subcrustal lithosphere, a three-component orogene
 (distal / proximal / wedge) and explicit mass-exchange gates.
 

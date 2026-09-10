@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Run the calibrated PLUMBO version IV model and save a comparison table."""
+"""Run the calibrated Version IV model and save a comparison table."""
 import os
 import pandas as pd
 from plumbotectonics.version4 import run, ratios

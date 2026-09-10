@@ -3,7 +3,7 @@
 > **English** | [简体中文](../theory.md)
 
 This document describes the calculation flow of the two models (Version I and
-Version IV / PLUMBO) and maps it onto `src/plumbotectonics/version1.py` and
+Version IV) and maps it onto `src/plumbotectonics/version1.py` and
 `version4.py`.
 
 ## 1. Overall framework
@@ -178,11 +178,11 @@ Each `history` entry:
 
 ---
 
-## 3. Version IV: PLUMBO / Haines & Zartman (1988)
+## 3. Version IV: Haines & Zartman (1988)
 
 Implementation: `plumbotectonics.version4.run()`
 
-> This chapter describes the PLUMBO implementation. The physical basis of the
+> This chapter describes the Version IV implementation. The physical basis of the
 > three-component orogene and of the bi-directional transport (the gates of
 > section 3.5) is given in Zartman & Haines (1988).
 

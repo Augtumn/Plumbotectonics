@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-"""Validation tests for the calibrated version IV model."""
+"""Validation tests for the calibrated Version IV model."""
 from plumbotectonics.version4 import run, ratios
 
 TARGETS = {

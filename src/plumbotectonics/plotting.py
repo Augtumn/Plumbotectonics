@@ -54,7 +54,7 @@ def _extract_version4_series(history: list[dict[str, Any]]) -> dict[str, dict[st
 
 
 def plot_version4_growth_curves(result: dict[str, Any], out_png: str, out_pdf: str | None = None) -> None:
-    """Plot version IV growth curves; returns the closed figure."""
+    """Plot Version IV growth curves; returns the closed figure."""
     hist = result["history"]
     series = _extract_version4_series(hist)
 
@@ -123,7 +123,7 @@ def plot_version4_growth_curves(result: dict[str, Any], out_png: str, out_pdf: s
 
 
 def plot_version1_growth_curves(history: list[dict[str, Any]], out_png: str, out_pdf: str | None = None) -> None:
-    """Plot version I growth curves; returns the closed figure."""
+    """Plot Version I growth curves; returns the closed figure."""
     names = ["mantle", "orogene", "upper", "lower"]
     labels = {"mantle": "Mantle", "orogene": "Orogene", "upper": "Upper crust", "lower": "Lower crust"}
     colors = {"mantle": "#1f77b4", "orogene": "#ff7f0e", "upper": "#d62728", "lower": "#2ca02c"}
