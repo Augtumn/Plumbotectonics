@@ -266,16 +266,17 @@ def run(dp=0.14, double_eroded=False):
             M[h][2][k][0] = M[h][1][k][0] - Mantle_h[0] + D_oro_h[0][2] - Sub_mant_h[0] + Rmor_h[0]
 
         # ---------------- increment / decay ----------------
-        T = 4.5 - (k-1)*0.1
-        Td = 0.1
+        # integer tenths: 4.5 ... 0.0 without binary-float drift
+        T = (45 - (k - 1)) / 10       # end of the interval
+        T_0 = (44 - (k - 1)) / 10     # start of the interval
         # mantle next cycle
         M[0][1][k+1][0] = M[0][2][k][0]
         M[1][1][k+1][0] = M[1][2][k][0]
         M[5][1][k+1][0] = M[5][2][k][0]
         M[6][1][k+1][0] = M[6][2][k][0]
-        M[2][1][k+1][0] = M[2][2][k][0] + M[6][2][k][0]*(math.exp(L1*T)-math.exp(L1*(T-Td)))
-        M[3][1][k+1][0] = M[3][2][k][0] + (M[6][2][k][0]/U8U5)*(math.exp(L2*T)-math.exp(L2*(T-Td)))
-        M[4][1][k+1][0] = M[4][2][k][0] + M[5][2][k][0]*(math.exp(L3*T)-math.exp(L3*(T-Td)))
+        M[2][1][k+1][0] = M[2][2][k][0] + M[6][2][k][0]*(math.exp(L1*T)-math.exp(L1*T_0))
+        M[3][1][k+1][0] = M[3][2][k][0] + (M[6][2][k][0]/U8U5)*(math.exp(L2*T)-math.exp(L2*T_0))
+        M[4][1][k+1][0] = M[4][2][k][0] + M[5][2][k][0]*(math.exp(L3*T)-math.exp(L3*T_0))
         # crustal segments 1..k
         for j in range(1, k+1):
             for l in range(0,4):
@@ -283,14 +284,14 @@ def run(dp=0.14, double_eroded=False):
                 M[1][1][j][l] = M[1][2][j][l]
                 M[5][1][j][l] = M[5][2][j][l]
                 M[6][1][j][l] = M[6][2][j][l]
-                M[2][1][j][l] = M[2][2][j][l] + M[6][2][j][l]*(math.exp(L1*T)-math.exp(L1*(T-Td)))
-                M[3][1][j][l] = M[3][2][j][l] + (M[6][2][j][l]/U8U5)*(math.exp(L2*T)-math.exp(L2*(T-Td)))
-                M[4][1][j][l] = M[4][2][j][l] + M[5][2][j][l]*(math.exp(L3*T)-math.exp(L3*(T-Td)))
+                M[2][1][j][l] = M[2][2][j][l] + M[6][2][j][l]*(math.exp(L1*T)-math.exp(L1*T_0))
+                M[3][1][j][l] = M[3][2][j][l] + (M[6][2][j][l]/U8U5)*(math.exp(L2*T)-math.exp(L2*T_0))
+                M[4][1][j][l] = M[4][2][j][l] + M[5][2][j][l]*(math.exp(L3*T)-math.exp(L3*T_0))
         def _sum_res(j):
             return {h: sum(M[h][1][i][j] for i in range(1, k+1)) for h in range(1,7)}
         history.append({
             'cycle': k,
-            'time_Ga': max(0.0, T - Td),
+            'time_Ga': max(0.0, T_0),
             'mantle': ratios({h: M[h][1][k+1][0] for h in range(1,7)}),
             'upper': ratios(_sum_res(1)),
             'lower': ratios(_sum_res(2)),

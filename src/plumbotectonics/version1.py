@@ -68,7 +68,8 @@ def run():
 
     times = []
     for i in range(11):
-        t = 4.0 - i*0.4
+        # integer tenths: 4.0, 3.6, ... 0.0 without binary-float drift
+        t = (40 - 4 * i) / 10
         frac = 1/8 if i==0 else 1/16 if i==1 else 1/32 if i==2 else 1/64 if i==3 else 1/128
         times.append((t, frac))
 
