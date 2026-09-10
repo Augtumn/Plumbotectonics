@@ -1,0 +1,10 @@
+# Normalize all text files to LF in the repository and in the working tree so
+# that line endings do not depend on the platform or on core.autocrlf.
+* text=auto eol=lf
+
+# Binary assets must never be line-ending converted.
+*.pdf binary
+*.png binary
+*.zip binary
+*.docx binary
+*.xlsx binary
