@@ -50,7 +50,10 @@ uv sync              # create .venv and install runtime dependencies
 uv sync --extra dev  # add the dev dependencies (pytest)
 ```
 
-Runtime dependencies are `numpy`, `pandas` and `matplotlib`.
+Runtime dependencies are `numpy`, `pandas` and `matplotlib`. **The models
+themselves have no third-party dependencies** (`version1.py` and `version4.py`
+import only `math`): numpy/pandas serve the comparison statistics in `scripts/`
+and matplotlib only the plotting.
 
 ## Run
 

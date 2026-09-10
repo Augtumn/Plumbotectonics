@@ -125,8 +125,11 @@ denominator branches of `ratios`.
 
 ## 6. Reproducibility
 
-- **Pure Python**: the computation uses only the standard library plus
-  NumPy/Pandas/Matplotlib, with no external data files;
+- **No third-party dependencies**: both model cores (`version1.py`,
+  `version4.py`) import only `math` -- not numpy/pandas/matplotlib, and no
+  external data files; `numpy`/`pandas` are used only by the comparison
+  statistics in `scripts/` (`np.max`/`np.sqrt`/`np.mean`) and `matplotlib` only
+  for plotting;
 - **Fully deterministic**: no random numbers, no timestamps, no
   order-dependent parallel reductions;
 - **Inputs inline**: initial conditions and Table 3 parameters are declared as

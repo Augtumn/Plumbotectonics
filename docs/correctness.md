@@ -112,7 +112,10 @@ $$
 
 ## 6. 可复现性
 
-- **纯 Python**：计算只用标准库 + NumPy/Pandas/Matplotlib，不依赖外部数据文件；
+- **零第三方依赖**：两个模型（`version1.py`、`version4.py`）只 `import math`，
+  不依赖 numpy/pandas/matplotlib，也不读任何外部数据文件；`numpy`/`pandas`
+  只用于 `scripts/` 的对比统计（`np.max`/`np.sqrt`/`np.mean`），`matplotlib`
+  只用于绘图；
 - **完全确定性**：全流程无随机数、无时间戳、无并行归约顺序不确定；
 - **输入内联**：初始条件与 Table 3 参数以常量/数组写在源码中，并注明出处；
 - **版本可追溯**：`pyproject.toml` 声明 `version = "0.1.0"` 与依赖下界。

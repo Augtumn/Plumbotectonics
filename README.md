@@ -44,7 +44,10 @@ uv sync              # 创建 .venv 并安装运行依赖
 uv sync --extra dev  # 需要 pytest 时追加开发依赖
 ```
 
-运行依赖为 `numpy`、`pandas`、`matplotlib`。
+运行依赖为 `numpy`、`pandas`、`matplotlib`。**模型本身零第三方依赖**
+（`version1.py`、`version4.py` 只 `import math`）：numpy/pandas 仅用于
+`scripts/` 的对比统计，matplotlib 仅用于绘图。安装位置见
+[`docs/usage.md`](docs/usage.md)。
 
 ## 运行
 
