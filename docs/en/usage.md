@@ -59,7 +59,7 @@ Writes into `outputs/figures/`:
 | `version1_growth_curves.png` / `.pdf` | Version I: three panels (207-206, 208-206, 206-t) |
 | `version4_growth_curves.png` / `.pdf` | Version IV: four panels (207-206, 208-206, 206-t, 238U/204Pb-t) |
 
-PNG output is 600 dpi, PDF is vector.
+PNG output is 600 dpi, PDF is vector. All figure text is English, so no CJK font is required.
 
 ## 4. Python API
 
@@ -145,7 +145,6 @@ running from the repository root is enough.
 | `ModuleNotFoundError: plumbotectonics` | `uv sync` not run, or not using `uv run` | `uv sync` and run through `uv run` |
 | `No module named pytest` | dev dependencies not installed | `uv sync --extra dev` |
 | `ImportError: Can't determine version for pytz` | pandas / pytz version mismatch | `uv pip install -U --force-reinstall pytz pandas` |
-| Chinese labels render as boxes | missing CJK font | install `Microsoft YaHei`/`SimHei`, or edit the font list in `plotting.py` |
 | `run_version4.py` is slow | 46 cycles x 6 isotopes | expected, usually a few seconds |
 
 > `plotting.py` sets `matplotlib.use("Agg")`, so it also runs headless

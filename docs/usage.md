@@ -58,7 +58,7 @@ uv run python scripts/plot_growth_curves.py
 | `version1_growth_curves.png` / `.pdf` | Version I：三面板（207–206、208–206、206–t） |
 | `version4_growth_curves.png` / `.pdf` | Version IV：四面板（207–206、208–206、206–t、238U/204Pb–t） |
 
-PNG 为 600 dpi，PDF 为矢量图。
+PNG 为 600 dpi，PDF 为矢量图。图内标题与坐标轴标签均为英文，不依赖中文字体。
 
 ## 4. Python API
 
@@ -144,7 +144,6 @@ uv run pytest
 | `ModuleNotFoundError: plumbotectonics` | 未执行 `uv sync`，或未用 `uv run` | `uv sync`，并用 `uv run` 执行脚本 |
 | `No module named pytest` | 未装开发依赖 | `uv sync --extra dev` |
 | `ImportError: Can't determine version for pytz` | pandas 与 pytz 版本不匹配 | `uv pip install -U --force-reinstall pytz pandas` |
-| 图中中文显示为方块 | 缺少中文字体 | 安装 `Microsoft YaHei`/`SimHei`，或修改 `plotting.py` 的字体列表 |
 | `run_version4.py` 较慢 | 46 个旋回 × 6 种同位素 | 正常，通常几秒内完成 |
 
 > `plotting.py` 已设置 `matplotlib.use("Agg")`，可在无显示环境（服务器/CI）运行。

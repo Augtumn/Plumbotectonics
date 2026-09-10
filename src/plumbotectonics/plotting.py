@@ -9,7 +9,7 @@ import matplotlib
 matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
-plt.rcParams["font.sans-serif"] = ["Microsoft YaHei", "SimHei", "DejaVu Sans"]
+plt.rcParams["font.sans-serif"] = ["DejaVu Sans", "Arial", "Helvetica"]
 plt.rcParams["axes.unicode_minus"] = False
 
 _RESERVOIRS = ["mantle", "upper", "lower", "sub", "orogene"]
@@ -69,7 +69,7 @@ def plot_version4_growth_curves(result: dict[str, Any], out_png: str, out_pdf: s
                     color=_COLORS[name], label=_LABELS[name])
     ax.set_xlabel("206Pb/204Pb")
     ax.set_ylabel("207Pb/204Pb")
-    ax.set_title("(A) 207Pb/204Pb–206Pb/204Pb 生长曲线")
+    ax.set_title("(A) 207Pb/204Pb vs 206Pb/204Pb growth curve")
     ax.grid(alpha=0.3)
     ax.legend(fontsize=9)
 
@@ -82,7 +82,7 @@ def plot_version4_growth_curves(result: dict[str, Any], out_png: str, out_pdf: s
                     color=_COLORS[name], label=_LABELS[name])
     ax.set_xlabel("206Pb/204Pb")
     ax.set_ylabel("208Pb/204Pb")
-    ax.set_title("(B) 208Pb/204Pb–206Pb/204Pb 生长曲线")
+    ax.set_title("(B) 208Pb/204Pb vs 206Pb/204Pb growth curve")
     ax.grid(alpha=0.3)
     ax.legend(fontsize=9)
 
@@ -93,9 +93,9 @@ def plot_version4_growth_curves(result: dict[str, Any], out_png: str, out_pdf: s
         if s["t"]:
             ax.plot(s["t"], s["x"], marker=_MARKERS[name], ms=4, lw=1.5,
                     color=_COLORS[name], label=_LABELS[name])
-    ax.set_xlabel("时间 (Ga)")
+    ax.set_xlabel("Time (Ga)")
     ax.set_ylabel("206Pb/204Pb")
-    ax.set_title("(C) 206Pb/204Pb 随时间演化")
+    ax.set_title("(C) 206Pb/204Pb vs time")
     ax.grid(alpha=0.3)
     ax.legend(fontsize=9)
 
@@ -106,13 +106,13 @@ def plot_version4_growth_curves(result: dict[str, Any], out_png: str, out_pdf: s
         if s["t"]:
             ax.plot(s["t"], s["u_pb"], marker=_MARKERS[name], ms=4, lw=1.5,
                     color=_COLORS[name], label=_LABELS[name])
-    ax.set_xlabel("时间 (Ga)")
+    ax.set_xlabel("Time (Ga)")
     ax.set_ylabel("238U/204Pb")
-    ax.set_title("(D) 238U/204Pb 随时间演化")
+    ax.set_title("(D) 238U/204Pb vs time")
     ax.grid(alpha=0.3)
     ax.legend(fontsize=9)
 
-    fig.suptitle("PLUMBO version IV 生长曲线（校准参数）", fontsize=15, y=1.02)
+    fig.suptitle("PLUMBO version IV growth curves (calibrated parameters)", fontsize=15, y=1.02)
     os.makedirs(os.path.dirname(os.path.abspath(out_png)), exist_ok=True)
     fig.savefig(out_png, dpi=600, bbox_inches="tight")
     if out_pdf:
@@ -172,13 +172,13 @@ def plot_version1_growth_curves(history: list[dict[str, Any]], out_png: str, out
                 ys.append(d["206/204"])
         if xs:
             ax.plot(xs, ys, marker=markers[name], ms=4, color=colors[name], label=labels[name])
-    ax.set_xlabel("时间 (Ga)")
+    ax.set_xlabel("Time (Ga)")
     ax.set_ylabel("206Pb/204Pb")
-    ax.set_title("(C) 206Pb/204Pb 随时间演化")
+    ax.set_title("(C) 206Pb/204Pb vs time")
     ax.grid(alpha=0.3)
     ax.legend(fontsize=8)
 
-    fig.suptitle("Zartman & Doe (1981) version I 生长曲线", fontsize=15, y=1.02)
+    fig.suptitle("Zartman & Doe (1981) version I growth curves", fontsize=15, y=1.02)
     os.makedirs(os.path.dirname(os.path.abspath(out_png)), exist_ok=True)
     fig.savefig(out_png, dpi=600, bbox_inches="tight")
     if out_pdf:
