@@ -33,7 +33,9 @@ uv run python scripts/run_version1.py
 打印 11 个旋回在 `206/204`、`207/204`、`208/204` 上的
 地幔、造山带、上地壳、下地壳比值。
 
-同一张表写入 `outputs/results/version1_history.csv`（UTF-8-BOM，用标准库 `csv`，不依赖 pandas）。
+同一份结果写入 `outputs/results/version1_history.csv`，长表格式——每个
+（旋回, 储库, 比值）一行，列为 `cycle`、`t_Ga`、`reservoir`、`ratio`、`model`。
+首轮尚无地壳段，对应行不写出。
 
 ### 3.2 Version IV（Table 4 对比）
 
@@ -45,7 +47,8 @@ uv run python scripts/run_version4.py
 逐项对比，输出 `outputs/results/version4_comparison.csv`（UTF-8-BOM），
 并在终端打印表格。
 
-CSV 列：`reservoir`、`ratio`、`model`、`table`、`abs_diff`。
+CSV 列：`reservoir`、`ratio`、`model`、`table`、`abs_diff`（同为长表，与
+`version1_history.csv` 共用 `reservoir` / `ratio` / `model` 三列）。
 
 ### 3.3 生长曲线图
 
@@ -128,7 +131,7 @@ outputs/
 └── results/   # version1_history.csv, version4_comparison.csv
 ```
 
-目录会在运行时自动创建。
+目录会在运行时自动创建。两份 CSV 均为长表，且共用 `reservoir` / `ratio` / `model` 三列名，便于拼接分析。
 
 ## 6. 测试
 

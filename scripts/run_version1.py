@@ -3,6 +3,9 @@
 
 Prints the 11-cycle growth history and saves it as
 ``outputs/results/version1_history.csv``.
+
+The output is a long table: one row per (cycle, reservoir, ratio), sharing the
+``reservoir`` / ``ratio`` / ``model`` columns with ``version4_comparison.csv``.
 """
 import csv
 import os
@@ -11,9 +14,7 @@ from plumbotectonics.version1 import run
 
 RESERVOIRS = ("mantle", "orogene", "upper", "lower")
 RATIOS = ("206/204", "207/204", "208/204")
-HEADER = ["cycle", "t_Ga"] + [
-    f"{reservoir}_{ratio}" for reservoir in RESERVOIRS for ratio in RATIOS
-]
+HEADER = ["cycle", "t_Ga", "reservoir", "ratio", "model"]
 
 
 def _fmt(d):
@@ -22,13 +23,15 @@ def _fmt(d):
     return f"{d['206/204']:.2f}/{d['207/204']:.2f}/{d['208/204']:.2f}"
 
 
-def _csv_row(index, entry):
-    row = [index + 1, f"{entry['t']:.1f}"]
-    for reservoir in RESERVOIRS:
-        data = entry.get(reservoir)
-        for ratio in RATIOS:
-            row.append("" if not data else f"{data[ratio]:.4f}")
-    return row
+def history_rows(history):
+    """Yield one row per (cycle, reservoir, ratio); skip absent reservoirs."""
+    for index, entry in enumerate(history, start=1):
+        for reservoir in RESERVOIRS:
+            data = entry.get(reservoir)
+            if not data:
+                continue
+            for ratio in RATIOS:
+                yield [index, f"{entry['t']:.1f}", reservoir, ratio, f"{data[ratio]:.6f}"]
 
 
 def main():
@@ -41,6 +44,7 @@ def main():
             f"{_fmt(entry['upper']):<19} {_fmt(entry['lower'])}"
         )
 
+    rows = list(history_rows(history))
     out = os.path.abspath(
         os.path.join(os.path.dirname(__file__), "..", "outputs", "results", "version1_history.csv")
     )
@@ -48,8 +52,7 @@ def main():
     with open(out, "w", newline="", encoding="utf-8-sig") as handle:
         writer = csv.writer(handle)
         writer.writerow(HEADER)
-        for index, entry in enumerate(history):
-            writer.writerow(_csv_row(index, entry))
+        writer.writerows(rows)
     print(f"\nSaved: {out}")
 
 

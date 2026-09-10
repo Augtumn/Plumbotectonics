@@ -32,8 +32,10 @@ uv run python scripts/run_version1.py
 ```
 
 Prints the `206/204`, `207/204` and `208/204` ratios of the mantle, orogene,
-upper crust and lower crust for all 11 cycles. The same table is written to
-`outputs/results/version1_history.csv` (UTF-8 with BOM, stdlib `csv`, no pandas).
+upper crust and lower crust for all 11 cycles. The same result is written to
+`outputs/results/version1_history.csv` in long form - one row per
+(cycle, reservoir, ratio) with the columns `cycle`, `t_Ga`, `reservoir`,
+`ratio` and `model`. Rows for reservoirs that do not exist yet are omitted.
 
 ### 3.2 Version IV (Table 4 comparison)
 
@@ -45,7 +47,9 @@ Compares the `dp=0.14` model against the 24 values of Haines & Zartman (1988),
 Table 4, writes `outputs/results/version4_comparison.csv` (UTF-8 with BOM) and
 prints the table to the terminal.
 
-CSV columns: `reservoir`, `ratio`, `model`, `table`, `abs_diff`.
+CSV columns: `reservoir`, `ratio`, `model`, `table`, `abs_diff` (also a long
+table, sharing the `reservoir` / `ratio` / `model` columns with
+`version1_history.csv`).
 
 ### 3.3 Growth curves
 
@@ -128,7 +132,7 @@ outputs/
 `-- results/   # version1_history.csv, version4_comparison.csv
 ```
 
-Directories are created automatically at run time.
+Directories are created automatically at run time. Both CSVs are long tables sharing the `reservoir` / `ratio` / `model` column names, so they can be concatenated.
 
 ## 6. Tests
 
