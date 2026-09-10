@@ -1,0 +1,168 @@
+# 结果正确性保证
+
+本文档说明"结果可信"的依据：**校验基准**、**不变量**、**回归测试**三层保证，
+以及模型的已知约定与适用范围。校验数据本身见 [`validation.md`](validation.md)。
+
+## 1. 三层保证体系
+
+| 层 | 手段 | 产物 |
+|---|---|---|
+| ① 基准校验 | 与论文印刷值逐项对比 | `tests/test_version1.py`、`tests/test_version4.py` |
+| ② 不变量校验 | 守恒量与结构约束 | `tests/test_conservation.py` |
+| ③ 回归测试 | 每次改动重跑 ①+② | `pytest` |
+
+三层全部通过，才认为结果"在模型定义下正确"。当前实测：**12/12 通过**。
+
+## 2. ① 基准校验
+
+### 2.1 Version IV → Haines & Zartman (1988) Table 4
+
+Table 4 给出 4 个储库 × 6 个比值的现今值，共 24 项。模型以 `dp=0.14`、
+46 个旋回运行，逐项比较，判据 `abs(diff) < 0.02`：
+
+- 实测最差偏差 **0.00993**（sub 库 `232Th/204Pb`），24 项全部通过；
+- 完整对照表见 [`validation.md`](validation.md) §1。
+
+### 2.2 Version I → Zartman & Doe (1981)
+
+- 初始地幔：206/204 = 10.36、207/204 = 12.12、208/204 = 30.55（精确匹配）；
+- 现今地幔：**18.2525 / 15.4801 / 38.0631**，对应 Table IV 的
+  18.25 / 15.48 / 38.06（容差 0.5 / 0.3 / 0.5）。
+
+## 3. ② 不变量校验
+
+### 3.1 质量守恒（精确，最强回归信号）
+
+两个模型的物质再分配都是"取出 → 混合 → 再分配"，既不产生也不损失质量：
+
+| 模型 | 初始质量 | 实测终态 | 偏差 |
+|---|---|---|---|
+| Version I | 800.0 | 800.000000000 | 0 |
+| Version IV | 1050.0 | 1050.000000000 | 0 |
+
+Version IV 四储库终态（$10^{24}$ g）：
+
+| 地幔 | 上地壳 | 下地壳 | 次地壳 | 合计 |
+|---|---|---|---|---|
+| 1000.1118 | 6.6957 | 15.9128 | 27.2797 | **1050.0000** |
+
+任何一个分配系数写错，都会立刻破坏这条恒等式，因此它比"比值接近论文值"
+更灵敏。
+
+### 3.2 结构不变量
+
+- Version I 每个旋回恰好新增 1 个上地壳段 + 1 个下地壳段，共 11 + 11 个；
+- Version I 所有段的质量与同位素摩尔数始终为正（不出现负储库）；
+- Version IV `history` 恰好 46 条，`cycle` 为 1–46，时间为 4.4 → 0.0 Ga；
+- Version IV `total[h] == mantle[h] + upper[h] + lower[h] + sub[h]`（h = 1..6）；
+- Version IV 地幔 `206Pb/204Pb` 随地质时间单调递增（放射性成因 Pb 只增不减）。
+
+## 4. 总摩尔数**不**守恒（模型约定，不是缺陷）
+
+实测总摩尔数（204 + 206 + 207 + 208 + 232 + 238）：
+
+| 模型 | 初始 | 终态 | 变化 |
+|---|---|---|---|
+| Version I | 3737.14 | 4456.92 | **+719.78** |
+| Version IV | 1859.47 | 2340.48 | **+481.01** |
+
+原因是论文模型的约定：**衰变区间内把母体当作常数**。子体按
+
+$$
+^{206}\mathrm{Pb} \mathrel{+}= ^{238}\mathrm{U}\left(e^{\lambda_{238}t}-e^{\lambda_{238}t'}\right)
+$$
+
+增加，而 $^{238}\mathrm{U}$ 本身并不减少；207 与 208 同理。于是 Pb 在
+账面上是"凭空"增加的，总摩尔数必然上升。
+
+这是 **Zartman & Doe / PLUMBO 的建模约定**，不是实现错误：
+
+- 质量守恒仍然成立（质量与摩尔数是两套独立的账）；
+- 模型的主要输出是 204 归一化的**比值**，母体常数化是论文定义的一部分；
+- 因此**回归测试只能断言质量守恒，不能断言总摩尔数守恒**；
+- 若改为严格原子守恒（衰变同时扣减母体），会得到另一套数值、无法复现
+  Table 4，属于"另一个模型"，不在本项目范围。
+
+## 5. 数值稳健性
+
+代码对退化输入有显式保护，避免 `ZeroDivisionError` / `NaN` 扩散：
+
+| 位置 | 保护 |
+|---|---|
+| `version4.FNEmoles` | `Bias <= 0` 或 `Denom == 0` → 返回 `0.0` |
+| `version4.run` 的 `V0` | 段质量为 0 → `V0 = 0` |
+| `version4.run` 的 `S_mant` 同位素分配 | 分母 `M_m - M_or == 0` → 跳过 |
+| `version1.ratios` / `version4.ratios` | 分母为 0 → 返回 `None` |
+| `plotting._extract_version4_series` | 跳过比值为 `None` 的条目 |
+
+`tests/test_conservation.py` 覆盖了 `FNEmoles` 的两个守卫分支与 `ratios` 的
+零分母分支。
+
+## 6. 可复现性
+
+- **纯 Python**：计算只用标准库 + NumPy/Pandas/Matplotlib，不依赖外部数据文件；
+- **完全确定性**：全流程无随机数、无时间戳、无并行归约顺序不确定；
+- **输入内联**：初始条件与 Table 3 参数以常量/数组写在源码中，并注明出处；
+- **版本可追溯**：`pyproject.toml` 声明 `version = "0.1.0"` 与依赖下界。
+
+同一环境下同一版本，结果逐位一致。
+
+## 7. 已知不一致的显式处理
+
+| 问题 | 处理 |
+|---|---|
+| 部分版本的 Table 4 把 lower 库 `238U/204Pb` 印成 6.1903（与同行不自洽） | 采用自洽值 **6.4903** 作为校验目标，并在文档中明确说明 |
+| Table 3 的印刷富集系数（整数）无法复现 Table 4 | 采用**标定值**（`version4.py` 的 `E_a2`…`F_c3`、`INIT_RATIOS`），印刷值仅作量级参考 |
+| `history['orogene']` 曾漏掉近端 + 楔形分量 | 已修复，见 [`validation.md`](validation.md) §3.1 |
+
+这些不一致都在文档中显式记录，而不是靠"调参凑数"掩盖。
+
+## 8. 如何自查
+
+```bash
+pip install -e . pytest
+pytest -q                      # 三层一起跑
+pytest -q tests/test_conservation.py   # 只跑不变量
+```
+
+不装 pytest 时，可直接运行测试函数：
+
+```python
+import sys
+sys.path[:0] = ["src", "tests"]
+import test_conservation as t
+for name in dir(t):
+    if name.startswith("test_"):
+        getattr(t, name)()
+        print("ok", name)
+```
+
+`scripts/run_version4.py` 会把 24 项对比写入
+`outputs/results/version4_comparison.csv`，便于人工复核。
+
+## 9. 局限与适用范围
+
+**保证的是"实现正确"**：本仓库忠实复现 Zartman & Doe (1981) 与
+Haines & Zartman (1988) 的模型定义、参数与标定。
+
+**不保证"地质真实"**：模型本身是对地球浅部演化的简化——长期稳态储库、
+离散造山旋回、母体常数化、造山带内部完全均一化等。把输出当作真实地球
+的预测，需要独立的地质论证，超出本文档范围。
+
+## 10. CI 建议
+
+```yaml
+# .github/workflows/tests.yml
+name: tests
+on: [push, pull_request]
+jobs:
+  pytest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -e . pytest
+      - run: pytest -q
+```
