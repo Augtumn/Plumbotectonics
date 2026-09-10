@@ -1065,7 +1065,7 @@ wheels = [
 [[package]]
 name = "plumbotectonics"
 version = "0.1.0"
-source = { virtual = "." }
+source = { editable = "." }
 dependencies = [
     { name = "matplotlib", version = "3.10.9", source = { registry = "https://mirrors.bfsu.edu.cn/pypi/web/simple" }, marker = "python_full_version < '3.11'" },
     { name = "matplotlib", version = "3.11.1", source = { registry = "https://mirrors.bfsu.edu.cn/pypi/web/simple" }, marker = "python_full_version >= '3.11'" },
